@@ -4,26 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="db5e771c-0692-420e-b3d7-81df038abe0a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/ipm_data.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/App_Helpers/Logger.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/App_Helpers/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Config/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Config/config.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DB_Helpers/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DB_Helpers/pg_helper.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/c2s/Templates/table_template_01.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/c2s/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/c2s/csv2sql.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/c2s/data_column.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/c2s/data_table.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/c2s/make_snake.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+    <list default="true" id="db5e771c-0692-420e-b3d7-81df038abe0a" name="Changes" comment="Project initiated.&#10;Implements basic config:&#10; - DB section&#10; - C2S (csv2sql) section&#10;&#10;Testing DB runners:&#10; - execute(f)&#10; - execute(f)_one&#10; - execute(f)_all&#10; &#10;Testing c2s functionality">
+      <change afterPath="$PROJECT_DIR$/Datagen/DataFaker.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Datagen/Datagen_checkers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Datagen/Datagen_issues.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Datagen/Integration_issues.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Datagen/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/Config/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/c2s/csv2sql.py" beforeDir="false" afterPath="$PROJECT_DIR$/c2s/csv2sql.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,6 +31,9 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/csv2sql/Templates/table_template_01.csv" root0="SKIP_HIGHLIGHTING" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
@@ -107,6 +99,15 @@
       <option name="presentableId" value="Default" />
       <updated>1743777394943</updated>
     </task>
+    <task id="LOCAL-00001" summary="Project initiated.&#10;Implements basic config:&#10; - DB section&#10; - C2S (csv2sql) section&#10;&#10;Testing DB runners:&#10; - execute(f)&#10; - execute(f)_one&#10; - execute(f)_all&#10; &#10;Testing c2s functionality">
+      <option name="closed" value="true" />
+      <created>1743800104476</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1743800104476</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -120,6 +121,10 @@
       </map>
     </option>
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Project initiated.&#10;Implements basic config:&#10; - DB section&#10; - C2S (csv2sql) section&#10;&#10;Testing DB runners:&#10; - execute(f)&#10; - execute(f)_one&#10; - execute(f)_all&#10; &#10;Testing c2s functionality" />
+    <option name="LAST_COMMIT_MESSAGE" value="Project initiated.&#10;Implements basic config:&#10; - DB section&#10; - C2S (csv2sql) section&#10;&#10;Testing DB runners:&#10; - execute(f)&#10; - execute(f)_one&#10; - execute(f)_all&#10; &#10;Testing c2s functionality" />
+  </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
@@ -127,11 +132,6 @@
           <url>file://$PROJECT_DIR$/main.py</url>
           <line>8</line>
           <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/c2s/csv2sql.py</url>
-          <line>16</line>
-          <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

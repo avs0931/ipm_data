@@ -1,4 +1,3 @@
-import re
 import os
 import copy
 import Config.config as Cfg
@@ -15,24 +14,25 @@ def boil_tables(template_file: Any, ns_prefix: str = "") -> []:
     dbg_print(os.path.abspath(template_file))
 
     if not os.path.exists(template_file):
-        raise FileNotFoundError
+        raise FileNotFoundError(f"No template file found on path: '{os.path.abspath(template_file)}'")
 
     tables = list()
     check_tables = list()
     dt: data_table = None
 
     with open(template_file, mode="r", encoding="utf-8") as tf:
-
+        # Read template file row-by row...
         for _, l in enumerate(tf):
+            # Comment found - skip it
             if l.startswith("#"):
-                # Comment found - skip it
                 continue
 
             l = l.strip("\n")
             if l.lower().startswith("table") and dt:
                 # ERROR: New table starts before current processing is completed
-                raise ValueError(
-                    f"Source data error: new table definition found during processing table {dt.name} at line{_}")
+                msg = f"Source data error: new table definition found during processing table {dt.name} at line{_}"
+                raise ValueError(msg)
+
             elif l.lower().startswith("table"):
                 # Table marker found - start ne table definition
                 dt = data_table(csv_line=l, ns_prefix=ns_prefix)
@@ -41,6 +41,7 @@ def boil_tables(template_file: Any, ns_prefix: str = "") -> []:
                 if tn in check_tables:
                     dbg_print(
                         f"Warning: table '{tn}' already exists in processed data. Table def started at {_} source row");
+
             elif l.startswith("---"):
                 # End table definition marker - store current definition
                 tables.append(copy.deepcopy(dt))
@@ -56,15 +57,15 @@ def boil_tables(template_file: Any, ns_prefix: str = "") -> []:
 # end of boil_tables()
 
 
-def sql_codegen(template_data: str):
-    assert template_data, "No template file"
+def sql_codegen(template_data_file: str):
+    assert template_data_file, "No template file"
     # ----------------------------------------
     # Boilerplate
     # Generate SQL-scripts
     # ----------------------------------------
 
     # Set-up files
-    template_file = os.path.join(Cfg.C2S_templates_path, template_data)
+    template_file = os.path.join(Cfg.C2S_templates_path, template_data_file)
     sql_dir = Cfg.C2S_upload_sql_path
     csv_dir = Cfg.C2S_upload_data_path
     output_file = os.path.join(Cfg.C2S_upload_sql_path, r"table_templates.sql")
