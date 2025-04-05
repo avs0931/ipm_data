@@ -4,15 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="db5e771c-0692-420e-b3d7-81df038abe0a" name="Changes" comment="Project initiated.&#10;Implements basic config:&#10; - DB section&#10; - C2S (csv2sql) section&#10;&#10;Testing DB runners:&#10; - execute(f)&#10; - execute(f)_one&#10; - execute(f)_all&#10; &#10;Testing c2s functionality">
-      <change afterPath="$PROJECT_DIR$/Datagen/DataFaker.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Datagen/Datagen_checkers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Datagen/Datagen_issues.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Datagen/Integration_issues.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Datagen/__init__.py" afterDir="false" />
+    <list default="true" id="db5e771c-0692-420e-b3d7-81df038abe0a" name="Changes" comment="Transfer data faker logic from Jupiter notebook to Datagen_issues.py module.&#10;&#10;Apply detailed comments to each component of Datagen_issues.py&#10;&#10;Result not tested yet!">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App_Helpers/Logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/App_Helpers/Logger.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Config/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/Config/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/c2s/csv2sql.py" beforeDir="false" afterPath="$PROJECT_DIR$/c2s/csv2sql.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Datagen/DataFaker.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datagen/DataFaker.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Datagen/Datagen_checkers.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Datagen/Datagen_issues.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datagen/Datagen_issues.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,16 +44,18 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Python.DataFaker.executor": "Run",
     "Python.csv2sql.executor": "Run",
     "Python.pg_helper.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
-    "last_opened_file_path": "C:/Users/aa.vasilyev/Desktop/DEV/Python/ipm_data/ipm_data/csv2sql/Templates",
+    "last_opened_file_path": "C:/Users/aa.vasilyev/Desktop/DEV/Python/ipm_data/ipm_data/Data/Datagen/csv",
     "settings.editor.selected.configurable": "preferences.fileTypes"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\aa.vasilyev\Desktop\DEV\Python\ipm_data\ipm_data\Data\Datagen\csv" />
       <recent name="C:\Users\aa.vasilyev\Desktop\DEV\Python\ipm_data\ipm_data\csv2sql\Templates" />
     </key>
   </component>
@@ -107,7 +107,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743800104476</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Transfer data faker logic from Jupiter notebook to Datagen_issues.py module.&#10;&#10;Apply detailed comments to each component of Datagen_issues.py&#10;&#10;Result not tested yet!">
+      <option name="closed" value="true" />
+      <created>1743865805050</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1743865805050</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -123,7 +131,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Project initiated.&#10;Implements basic config:&#10; - DB section&#10; - C2S (csv2sql) section&#10;&#10;Testing DB runners:&#10; - execute(f)&#10; - execute(f)_one&#10; - execute(f)_all&#10; &#10;Testing c2s functionality" />
-    <option name="LAST_COMMIT_MESSAGE" value="Project initiated.&#10;Implements basic config:&#10; - DB section&#10; - C2S (csv2sql) section&#10;&#10;Testing DB runners:&#10; - execute(f)&#10; - execute(f)_one&#10; - execute(f)_all&#10; &#10;Testing c2s functionality" />
+    <MESSAGE value="Transfer data faker logic from Jupiter notebook to Datagen_issues.py module.&#10;&#10;Apply detailed comments to each component of Datagen_issues.py&#10;&#10;Result not tested yet!" />
+    <option name="LAST_COMMIT_MESSAGE" value="Transfer data faker logic from Jupiter notebook to Datagen_issues.py module.&#10;&#10;Apply detailed comments to each component of Datagen_issues.py&#10;&#10;Result not tested yet!" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -132,6 +141,16 @@
           <url>file://$PROJECT_DIR$/main.py</url>
           <line>8</line>
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Datagen/DataFaker.py</url>
+          <line>157</line>
+          <option name="timeStamp" value="16" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Datagen/DataFaker.py</url>
+          <line>133</line>
+          <option name="timeStamp" value="17" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

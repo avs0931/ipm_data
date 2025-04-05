@@ -1,22 +1,28 @@
+import os.path
+
+# ########################################
+# App Environment
+# ########################################
+APP_Verbose_Mode: bool = True     # TRACE messages are allowed
+APP_Debug_Mode: bool = True       # DEBUG messages are allowed
+
 # ########################################
 # DB Config params
 # ########################################
-import os.path
-
-DB_Server = "localhost"
-DB_port = "5432"
-DB_User = "postgres"
-DB_Password = "QA_2ws3zxc"
-DB_default_base = "test"
+DB_Server = "localhost"           # PostgreSQL server location
+DB_port = "5432"                  # PostgreSQL server connection port
+DB_User = "postgres"              # Default DB Server
+DB_Password = "QA_2ws3zxc"        # User password
+DB_default_base = "test"          # Default database (schema - public)
 
 # ########################################
 # c2s Config params
 # ########################################
+C2S_ns_prefix = "ch"              # DDL/DML table names prefix. An empty prefix is possible.
 # TODO: replace this abs path with next line
 C2S_templates_path = r"C:\Users\aa.vasilyev\Desktop\DEV\Python\ipm_data\ipm_data\c2s\Templates"
 # C2S_templates_path = r"./c2s/Templates"
 C2S_template_file = r"table_template_01.csv"
-C2S_ns_prefix = "ch"
 C2S_upload_path = os.path.join(r"C:/Users/Public/PGData/", DB_default_base, C2S_ns_prefix)
 C2S_upload_sql_path = os.path.join(C2S_upload_path, "sql")
 C2S_upload_data_path = os.path.join(C2S_upload_path, "data")
@@ -25,5 +31,5 @@ C2S_upload_data_path = os.path.join(C2S_upload_path, "data")
 # Datagen Config params
 # ########################################
 # TODO: replace this abs path with next line
-DG_generation_upload_path = r"C:\Users\aa.vasilyev\Desktop\DEV\Python\ipm_data\ipm_data\Data\Datagen"
-# DG_generation_upload_path = r".\Data\Datagen"
+DG_generation_data_path = r"C:\Users\aa.vasilyev\Desktop\DEV\Python\ipm_data\ipm_data\Data\Datagen\csv"
+# DG_generation_data_path = r".\Data\Datagen\csv"
