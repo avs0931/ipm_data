@@ -63,8 +63,8 @@ class E_Types(Enum):
     ld_executive_doc_types = 8         # Types of executive docs.                        Fake, local, generated.
     ld_permissive_doc_types = 9        # Types of permissive docs.                       Fake, local, generated.
     ld_measure_unit_guide = 10         # Measure Unit Guide.                             Real, local, loadable.
-    ld_resource_group_guide = 11       # Resource's Guida.                               Fake, local, generated.
-    ld_resource_logistics_guide = 12   # Resource's logistics params.                    Fake, local, generated.
+    ld_resource_group_guide = 11       # Resource's Guida.                               Real, local, loadable.
+    ld_resource_logistics_guide = 12   # Resource's logistics params.                    Real, local, loadable.
     ld_local_doc_contexts = 13         # Types of document context.                      Fake, local, generated.
     bank_entity = 14                   # Bank offices.                                   Real, local, loadable
     construction_site = 15             # Construction Sites.                             Fake, cache, generated.
@@ -87,11 +87,15 @@ class E_Types(Enum):
 
 
 class DataItem:
+
     def __init__(self, item_type: E_Types, data_path: str):
         self._item_type: E_Types = item_type
         self._load_path: str = os.path.join(data_path, self._item_type.name + ".csv")
         self._data_path: str = self._load_path
         self._data: pd.DataFrame = self._load(self._load_path)
+        # This is instance-level set of unique local_id's to provide uniform
+        # PK/FK relationships during data generation
+        self._unique_id_set = list()
 
     def _load(self, load_path: str) -> pd.DataFrame:
         trc_print(f"Try to load data of type: '{self._item_type.name}' form: '{self._load_path}'")
@@ -108,43 +112,93 @@ class DataItem:
         return pd.DataFrame()
     # end of _load()
 
-    def get_item_type(self):
+    def get_item_type(self) -> E_Types:
+        """
+        :return: E_Type enum - type of instance
+        """
+        return self._item_type
+
+    def get_item_type_name(self) -> str:
+        """
+        :return: Name (string value) of E_Type enum - type of instance
+        """
         return self._item_type.name
 
-    def has_data(self):
+    def has_data(self) -> bool:
+        """
+        :return: True if data present. Otherwise - False
+        """
         return (self._data is not None) and (not self._data.empty)
 
-    def data_len(self):
+    def data_len(self) -> int:
+        """
+        :return: Number of items in data collection
+        """
         return len(self._data) if self.has_data() else 0
 
-    def get_data(self):
+    def get_data(self) -> pd.DataFrame:
+        """
+        :return: Data collection for instance if data present. Otherwise - empty data frame.
+        """
         return self._data if self.has_data() else pd.DataFrame()
 
-    def set_data(self, data: pd.DataFrame):
+    def set_data(self, data: pd.DataFrame) -> None:
+        """
+        Set data collection fot instance. This call will cause erasing of current _unique_data_set collection
+        :param data:
+        :return: None
+        """
         if (data is not None) and (len(data) > 0):
             trc_print(f"Data has been successfully sets with '{len(data)}' rows in '{len(data.columns)}' columns")
             self._data = data
+            self._unique_id_set.clear()
         else:
-            wrn_print(f"There is no valid data to set for data type: '{self.get_item_type()}'. Current data leaves unchanged")
+            wrn_print(f"There is no valid data to set for data type: '{self.get_item_type_name()}'. Current data leaves unchanged")
 
-    def get_load_path(self):
+    def get_load_path(self) -> str:
+        """
+        :return: Current path to data file to load/save data collection
+        """
         return self._load_path
 
-    def save_data(self):
+    def get_unique_id_set(self, set_length: int):
+        """
+        Create instance-level set of unique local_id's to provide uniform PK/FK relationships during data generation
+        :param set_length: number of unique local_id in selection
+        :return: set (unique) of local_id's
+        """
+        assert self.has_data(), f"Can't provide unique id set for type: '{self.get_item_type_name()}' - there is no data"
+        assert set_length <= self.data_len()
+        if len(self._unique_id_set) == 0:
+            self._unique_id_set = random.sample(list(self.get_data()["local_id"]), set_length)
+
+        return self._unique_id_set
+    # end of get_unique_id_set()
+
+    def save_data(self, data_path: str = "") -> str:
+        """
+        Save current data collection to designated file.
+        :param data_path: Path/File to save data collection. Default: value of get_load_path()
+        :return:
+        """
         if not self._data_path:
-            wrn_print(f"Can't save data of type '{self.get_item_type()}' to file. Data path not defined")
+            wrn_print(f"Can't save data of type '{self.get_item_type_name()}' to file. Data path not defined")
         elif not self.has_data():
-            wrn_print(f"Can't save data of type '{self.get_item_type()}' to file. There is no data")
+            wrn_print(f"Can't save data of type '{self.get_item_type_name()}' to file. There is no data")
         else:
+            if not data_path:
+                data_path = self.get_load_path()
             try:
                 df = self.get_data()
-                path = self.get_load_path()
-                df.to_csv(path, sep="\t", index=False)
-                trc_print(f"Data to type '{self.get_item_type()}' has been successfully saved with '{len(df)}' rows in '{len(df.columns)}' columns. File: '{path}'")
+                df.to_csv(data_path, sep="\t", index=False)
+                trc_print(f"Data to type '{self.get_item_type_name()}' has been successfully saved with '{len(df)}' rows in '{len(df.columns)}' columns. File: '{data_path}'")
+                return data_path
             except Exception as e:
-                err_print(f"Saving data of type '{self.get_item_type()}' failed", ex=e)
+                err_print(f"Saving data of type '{self.get_item_type_name()}' failed", ex=e)
+        return ""
     # end of save_data()
 # end of DataItem class
+
 
 class GenCC:
     """Data generator command center"""
@@ -152,16 +206,184 @@ class GenCC:
 # end of GenCC class
 
 
+def data_gen(item_type: E_Types, data_dict: {}) -> pd.DataFrame:
+    """
+    Generate data collection of given type
+    :param item_type: Type of data to be generated
+    :param data_dict: Container to store/retrieve typed DataItem instances with generated collection of data.
+    :return: Typed data collection if success. Otherwise - empty DataFrame
+    """
+    assert data_dict is not None, "Data dictionary not provided"
+
+    def _get_item_by_type(d_type: E_Types) -> DataItem:
+        if d_type.name not in data_dict.keys():
+            err_print(f"Can't retrieve item by key '{d_type.name}'")
+            return None
+        return data_dict[d_type.name]
+    # end of get_item_by_type()
+
+    def _get_data_by_type(d_type: E_Types) -> pd.DataFrame:
+        # Local function
+        if d_type.name not in data_dict.keys():
+            err_print(f"Can't retrieve data by key '{d_type.name}'")
+            return pd.DataFrame()
+        return data_dict[d_type.name].get_data()
+    # end of get_data_by_type()
+
+    pt_data = pd.DataFrame()
+
+    if item_type == E_Types.ld_project_types:
+        pt_data = ld_by_key.generate(item_type.name)
+
+    elif item_type == E_Types.ld_project_statuses:
+        pt_data = ld_by_key.generate(item_type.name)
+
+    elif item_type == E_Types.ld_project_party_types:
+        pt_data = ld_by_key.generate(item_type.name)
+
+    elif item_type == E_Types.ld_contract_types:
+        pt_data = ld_by_key.generate(item_type.name)
+
+    elif item_type == E_Types.ld_contract_statuses:
+        pt_data = ld_by_key.generate(item_type.name)
+
+    elif item_type == E_Types.ld_contract_party_types:
+        pt_data = ld_by_key.generate(item_type.name)
+
+    elif item_type == E_Types.ld_control_check_types:
+        pt_data = ld_by_key.generate(item_type.name)
+
+    elif item_type == E_Types.ld_control_violation_types:
+        pt_data = ld_by_key.generate(item_type.name)
+
+    elif item_type == E_Types.ld_executive_doc_types:
+        pt_data = ld_by_key.generate(item_type.name)
+
+    elif item_type == E_Types.ld_permissive_doc_types:
+        pt_data = ld_by_key.generate(item_type.name)
+
+    elif item_type == E_Types.ld_measure_unit_guide:
+        wrn_print(f"Data with key: '{item_type.name}' is real and can't be generated")
+
+    elif item_type == E_Types.ld_resource_group_guide:
+        wrn_print(f"Data with key: '{item_type.name}' is real and can't be generated")
+
+    elif item_type == E_Types.ld_resource_logistics_guide:
+        wrn_print(f"Data with key: '{item_type.name}' is real and can't be generated")
+
+    elif item_type == E_Types.ld_local_doc_contexts:
+        wrn_print(f"Not implemented: generation for key '{item_type.name}'")
+
+    elif item_type == E_Types.bank_entity:
+        wrn_print(f"Data with key: '{item_type.name}' is real and can't be generated")
+
+    elif item_type == E_Types.construction_site:
+        # wrn_print(f"Not implemented: generation for key '{item_type.name}'")
+        p_itm = _get_item_by_type(E_Types.project_entity)
+        if p_itm is not None and p_itm.has_data():
+            max_project = 5
+            pid_set = p_itm.get_unique_id_set(set_length=max_project)
+            pt_data = ConstructionSite.generate(project_id_set=pid_set)
+        else:
+            err_print(f"Can't create data for :'{item_type.name}'")
+
+    elif item_type == E_Types.contract_entity:
+        p_itm = _get_item_by_type(E_Types.project_entity)
+        if p_itm is not None and p_itm.has_data():
+            max_project = 5
+            pid_set = p_itm.get_unique_id_set(set_length=max_project)
+            pt_data = ContractEntity.generate(project_id_set=pid_set,
+                                              contract_statuses=_get_data_by_type(E_Types.ld_contract_statuses),
+                                              contract_types=_get_data_by_type(E_Types.ld_contract_types))
+        else:
+            err_print(f"Can't create data for :'{item_type.name}'")
+
+    elif item_type == E_Types.contract_parties:
+        c_itm = _get_item_by_type(E_Types.contract_entity)
+        e_itm = _get_item_by_type(E_Types.contractor_entity)
+        if c_itm is not None and c_itm.has_data() \
+                and e_itm is not None and e_itm.has_data():
+            max_contracts = 5
+            max_parties = 50
+            cid_set = c_itm.get_unique_id_set(set_length=max_contracts)
+            eid_set = e_itm.get_unique_id_set(set_length=max_parties)
+            pt_data = ContractParties.generate(contract_id_set=cid_set, contractor_id_set=eid_set,
+                                               contract_party_types=_get_data_by_type(E_Types.ld_contract_party_types))
+        else:
+            err_print(f"Can't create data for :'{item_type.name}'")
+
+    elif item_type == E_Types.contractor_entity:
+        pt_data = ContractorEntity.generate(bank_data=_get_data_by_type(E_Types.bank_entity))
+
+    elif item_type == E_Types.contractor_personnel:
+        e_itm = _get_item_by_type(E_Types.contractor_entity)
+        if e_itm is not None and e_itm.has_data():
+            max_parties = 50
+            eid_set = e_itm.get_unique_id_set(set_length=max_parties)
+            pt_data = ContractorPersonnel.generate(contractor_id_set=eid_set,
+                                                   personality_data=_get_data_by_type(E_Types.personality_entity))
+        else:
+            err_print(f"Can't create data for :'{item_type.name}'")
+
+    elif item_type == E_Types.document_base:
+        wrn_print(f"Not implemented: generation for key '{item_type.name}'")
+
+    elif item_type == E_Types.personality_entity:
+        pt_data = PersonalityEntity.generate()
+
+    elif item_type == E_Types.project_entity:
+        pt_data = ProjectEntity.generate(statuses=_get_data_by_type(E_Types.ld_project_statuses),
+                                         types=_get_data_by_type(E_Types.ld_project_types))
+
+    elif item_type == E_Types.project_parties:
+        p_itm = _get_item_by_type(E_Types.project_entity)
+        e_itm = _get_item_by_type(E_Types.contractor_entity)
+        if p_itm is not None and p_itm.has_data() \
+            and e_itm is not None and e_itm.has_data():
+            max_project = 5
+            max_parties = 50
+            pid_set = p_itm.get_unique_id_set(set_length=max_project)
+            eid_set = e_itm.get_unique_id_set(set_length=max_parties)
+            pt_data = ProjectParties.generate(project_id_set=pid_set,
+                                              contractor_id_set=eid_set,
+                                              project_party_types=_get_data_by_type(E_Types.ld_project_party_types))
+        else:
+            err_print(f"Can't create data for :'{item_type.name}'")
+
+    else:
+        err_print(f"Data generator for key '{item_type.name}' not found")
+
+    return pt_data
+# end of data_gen()
+
+
 def data_init():
-    for etype in E_Types:
-        try:
-            dit = DataItem(item_type=etype, data_path=Cfg.DG_generation_data_path)
-            if not dit.has_data():
-                trc_print(f"Try to generate data for type: '{etype}' via 'ld_by_key()' generator")
-                dit.set_data(ld_by_key.generate(resource_key=etype.name))
-                dit.save_data()
-        except Exception as e:
-            err_print(f"DataItem of type '{etype.name}' failed.", ex=e)
+    data_dict = {}
+    for i in range(3):
+        trc_print("********************************************************************************************")
+        trc_print("*")
+        trc_print(f"* DATA GENERATION PHASE {i}")
+        trc_print("*")
+        trc_print("********************************************************************************************")
+
+        for e_type in E_Types:
+            if e_type.name in data_dict:
+                continue
+
+            trc_print("*****")
+            trc_print(f"***** '{e_type.name:<32}' is running --------------------------------------------------")
+            try:
+                dit = DataItem(item_type=e_type, data_path=Cfg.DG_generation_data_path)
+                if not dit.has_data():
+                    trc_print(f"Try to generate data for type: '{e_type}'")
+                    item_data = data_gen(item_type=e_type, data_dict=data_dict)
+                    dit.set_data(item_data)
+                    dit.save_data()
+
+                if dit.has_data():
+                    data_dict[e_type.name] = dit
+            except Exception as e:
+                err_print(f"DataItem of type '{e_type.name}' failed.", ex=e)
 # end of data_init()
 
 

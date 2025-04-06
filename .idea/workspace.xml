@@ -4,12 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="db5e771c-0692-420e-b3d7-81df038abe0a" name="Changes" comment="Transfer data faker logic from Jupiter notebook to Datagen_issues.py module.&#10;&#10;Apply detailed comments to each component of Datagen_issues.py&#10;&#10;Result not tested yet!">
+    <list default="true" id="db5e771c-0692-420e-b3d7-81df038abe0a" name="Changes" comment="Create DataFaker.DataItem component.&#10;All ld_xxx local dictionaries generated and saved successfully.&#10;Establish DataFaker.E_Types enumeration to support data manipulation.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/App_Helpers/Logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/App_Helpers/Logger.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/Config/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Datagen/DataFaker.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datagen/DataFaker.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Datagen/Datagen_checkers.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Datagen/Datagen_issues.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datagen/Datagen_issues.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -115,7 +112,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743865805050</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Create DataFaker.DataItem component.&#10;All ld_xxx local dictionaries generated and saved successfully.&#10;Establish DataFaker.E_Types enumeration to support data manipulation.">
+      <option name="closed" value="true" />
+      <created>1743886724680</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1743886724680</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -132,7 +137,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Project initiated.&#10;Implements basic config:&#10; - DB section&#10; - C2S (csv2sql) section&#10;&#10;Testing DB runners:&#10; - execute(f)&#10; - execute(f)_one&#10; - execute(f)_all&#10; &#10;Testing c2s functionality" />
     <MESSAGE value="Transfer data faker logic from Jupiter notebook to Datagen_issues.py module.&#10;&#10;Apply detailed comments to each component of Datagen_issues.py&#10;&#10;Result not tested yet!" />
-    <option name="LAST_COMMIT_MESSAGE" value="Transfer data faker logic from Jupiter notebook to Datagen_issues.py module.&#10;&#10;Apply detailed comments to each component of Datagen_issues.py&#10;&#10;Result not tested yet!" />
+    <MESSAGE value="Create DataFaker.DataItem component.&#10;All ld_xxx local dictionaries generated and saved successfully.&#10;Establish DataFaker.E_Types enumeration to support data manipulation." />
+    <option name="LAST_COMMIT_MESSAGE" value="Create DataFaker.DataItem component.&#10;All ld_xxx local dictionaries generated and saved successfully.&#10;Establish DataFaker.E_Types enumeration to support data manipulation." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -144,12 +150,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Datagen/DataFaker.py</url>
-          <line>157</line>
+          <line>375</line>
           <option name="timeStamp" value="16" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Datagen/DataFaker.py</url>
-          <line>133</line>
+          <line>183</line>
           <option name="timeStamp" value="17" />
         </line-breakpoint>
       </breakpoints>

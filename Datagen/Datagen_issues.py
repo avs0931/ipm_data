@@ -154,7 +154,7 @@ class PersonalityEntity(FakeBase):
             self.fd["gender"] = "жен"
             self.fd["last_name"] = _faker.last_name_female()
             self.fd["first_name"] = _faker.first_name_female()
-            self.fd["ssecond_name"] = _faker.middle_name_female()
+            self.fd["second_name"] = _faker.middle_name_female()
 
         self.fd["birth_date"] = _faker.date_between(start_date=datetime.date(1970, 1, 1),
                                                     end_date=datetime.date(2000, 12, 31))
@@ -280,35 +280,27 @@ class ContractorPersonnel(FakeBase):
         return f'{self.fd["contractor_id"]} / {self.fd["personnel_id"]}: {self.fd["positions"]} - {self.fd["contacts"]} ({self.fd["can_sign"]}")'
 
     @staticmethod
-    def generate(contractor_data: pd.DataFrame, personality_data: pd.DataFrame, max_companies: int = 1,
-                 max_employees: int = 10) -> pd.DataFrame:
+    def generate(contractor_id_set: [], personality_data: pd.DataFrame, max_employees: int = 10) -> pd.DataFrame:
         """
         Generate fresh new data sets about employer / employees
-        :param contractor_data: pandas.DataFrame for randomly selection of company (employer)
+        :param contractor_id_set: set of unique local_id's of Companies to assign to Employers
         :param personality_data: padnas.DataFrame for randomly selection of person as new employee
-        :param max_companies: Number of companies to processing
         :param max_employees: Number of employees that will be added to each using company
         :return: pandas.DataFrame filled with fresh new data
         in accordance with data-schema as it can be loaded from production DB
         """
+        max_companies = len(contractor_id_set)
         assert max_companies >= 1, "Invalid contractor max value"
         assert max_companies < 100, "Contractor max too big"
-        assert len(contractor_data) >= max_companies, "Contractor data is empty or too short"
         assert max_employees >= 1, "Invalid personnel max value"
         assert max_employees <= 1000, "Personnel max too big"
         assert len(personality_data) > max_employees, "Personnel data too short"
 
-        # Take set of contracotrs
-        cid_set = set()
-        while len(cid_set) < max_companies:
-            idx = random.randint(0, len(contractor_data) - 1)
-            cid_set.add(contractor_data.at[idx, "local_id"])
-
-        # Gor for data
         c = list()
-        for cid in cid_set:
+        # Take set of contractors and gor for data
+        for c_id in set(contractor_id_set):
             for i in range(max_employees):
-                p = ContractorPersonnel(contractor_id=cid, personal_data=personality_data)
+                p = ContractorPersonnel(contractor_id=c_id, personal_data=personality_data)
                 c.append(p.get_data())
 
         return pd.DataFrame(c)
@@ -376,16 +368,16 @@ class ProjectParties(FakeBase):
     Represent any single party (participant) of project.
     Note: current _faker can provide from 2 (two) to 5 (five) project parties for each project's instance
     """
-    def __init__(self, project_id: uuid, contractor_data: pd.DataFrame, project_party_types: pd.DataFrame):
+    def __init__(self, project_id: uuid, contractor_id: uuid, project_party_types: pd.DataFrame):
         """
         Create single party (participant) of project
         :param project_id: id of project's instance that this participant will belong to
-        :param contractor_data: pandas.DataFrame for randomly selection as project's party
+        :param contractor_id: id of contractor's instance to be assigned as a participant to the project
         :param project_party_types: pandas.DataFrame contains allowed types of Contractor for randomly selection.
         """
         super().__init__()
         self.fd["project_id"] = project_id
-        self.fd["contractor_id"] = contractor_data.at[random.randint(0, len(contractor_data) - 1), "local_id"]
+        self.fd["contractor_id"] = contractor_id
         self.fd["party_type"] = project_party_types.at[random.randint(0, len(project_party_types) - 1), "local_id"]
         self.fd["role_description"] = f"Проектная роль № {random.randint(0, 15)}"
         self.fd["activated_at"] = _faker.date_between(start_date=datetime.date(2024, 1, 1),
@@ -404,35 +396,29 @@ class ProjectParties(FakeBase):
         return f'project party: {self.fd["project_id"]} / {self.fd["contractor_id"]} - {self.fd["party_type"]} role: {self.fd["role_description"]}'
 
     @staticmethod
-    def generate(project_data: pd.DataFrame, contractors: pd.DataFrame, project_party_types: pd.DataFrame,
-                 max_projects: int = 10) -> pd.DataFrame:
+    def generate(project_id_set: [], contractor_id_set: [], project_party_types: pd.DataFrame) -> pd.DataFrame:
         """
         Generate fresh new set of project/participants relations.
-        :param project_data: pandas.DataFrame represents current set of projects for randomly selection
-        to establish project/participants relationship
-        :param contractors: pandas.DataFrame represents current set of contractor entities for randomly selection
+        :param project_id_set: set of unique local_id's of project_data to establish project/participants relationship
+        :param contractor_id_set: set of unique local_id's of contractors for randomly selection
         as project's participant
         :param project_party_types: pandas.DataFrame represents type of participation for selected participant.
-        :param max_projects: Number of projects to be processed.
         :return: pandas.DataFrame filled with fresh new data
         in accordance with data-schema as it can be loaded from production DB
         """
+        max_projects = len(project_id_set)
         assert max_projects > 0, "Invalid max_project LE ZERO"
         assert max_projects < 100, "Max_project too big"
-        assert len(project_data) > max_projects * 2, "Project data too short"
-        assert len(contractors) > max_projects * 2, "Contractor's set too short"
+        assert len(contractor_id_set) > max_projects * 5, f"Contractor's set must contains at least of {max_projects * 5} items"
         assert len(project_party_types) > 0, "project_party_types is empty"
 
-        p_list = set()
-        while len(p_list) < max_projects:
-            idx = random.randint(0, len(project_data) - 1)
-            p_list.add(project_data.at[idx, "local_id"])
-
         c = list()
-        for p_id in p_list:
-            # Number of contract parties is at least 2 and max of 4
+        #  Create set of parties for each listed project
+        for p_id in set(project_id_set):
+            # Number of project parties is at least of 2 and max of 5
             for _ in range(random.randint(2, 5)):
-                p = ProjectParties(project_id=p_id, contractor_data=contractors,
+                p = ProjectParties(project_id=p_id,
+                                   contractor_id=random.choice(contractor_id_set),
                                    project_party_types=project_party_types)
                 c.append(p.get_data())
 
@@ -469,28 +455,32 @@ class ConstructionSite(FakeBase):
         return f'construction site: {self.fd["external_code"]} / {self.fd["entity_description"]} - {self.fd["is_primary"]} parent: {self.fd["primary_construction_id"]}'
 
     @staticmethod
-    def generate(project_id: uuid, max_objects: int = 10) -> pd.DataFrame:
+    def generate(project_id_set: [], max_objects: int = 10) -> pd.DataFrame:
         """
         Generate number of construction objects and assign it to the given project
-        :param project_id: id of project
+        :param project_id_set: set of unique local_id's of project
         :param max_objects: Number of objects to be created (this is vary by random)
         :return: pandas.DataFrame filled with fresh new data
         in accordance with data-schema as it can be loaded from production DB
         """
+        max_projects = len(project_id_set)
+        assert max_projects > 0, "Invalid max_project LE ZERO"
         assert max_objects > 1, "Invalid max_objects LE ONE"
         assert max_objects < 100, "Max_project too big"
 
         c = list()
-        c_id: uuid = None
-        for _, cc in enumerate(range(random.randint(1, max_objects))):
-            if _ == 0:
-                # Make first site primary
-                p = ConstructionSite(project_id=project_id, is_primary=True)
-                c_id = p.get_id()
-            else:
-                p = ConstructionSite(project_id=project_id, is_primary=False, parent_id=c_id)
+        # Create set of site/sub-site(s) for each listed project
+        for p_id in set(project_id_set):
+            c_id: uuid = None
+            for _, cc in enumerate(range(random.randint(1, max_objects))):
+                if _ == 0:
+                    # Make first site primary
+                    p = ConstructionSite(project_id=p_id, is_primary=True)
+                    c_id = p.get_id()
+                else:
+                    p = ConstructionSite(project_id=p_id, is_primary=False, parent_id=c_id)
 
-            c.append(p.get_data())
+                c.append(p.get_data())
 
         return pd.DataFrame(c)
 # end of ConstructionSite class
@@ -540,36 +530,40 @@ class ContractEntity(FakeBase):
         return f'contract: {self.fd["contract_number"]} / {self.fd["contract_subject"]} - {self.fd["contract_value"]} parent: {self.fd["base_contract_id"]}'
 
     @staticmethod
-    def generate(project_id: uuid, contract_statuses: pd.DataFrame, contract_types: pd.DataFrame,
+    def generate(project_id_set: [], contract_statuses: pd.DataFrame, contract_types: pd.DataFrame,
                  max_contracts: int = 5) -> pd.DataFrame:
         """
         Generate fresh new set of contracts assigned to given project.
-        :param project_id: id of project that this set of contracts will assign.
+        :param project_id_set: set of unique local_id of projects that set of contracts will assign.
         :param contract_statuses: pandas.DataFrame for randomly selection of contract's statuses
         :param contract_types: pandas.DataFrame for randomly selection of contract's types
         :param max_contracts: Number of contracts to be created (this is vary by random)
         :return: pandas.DataFrame filled with fresh new data
         in accordance with data-schema as it can be loaded from production DB
         """
+        max_projects = len(project_id_set)
+        assert max_projects > 0, "Invalid max_project LE ZERO"
         assert max_contracts > 1, "max_contracts LE ONE"
         assert max_contracts < 20, "max_contracts too big"
 
         c = list()
+        # Create set of contract/contract amendment for each listed project
+        for p_id in set(project_id_set):
+            c_id = ""
+            for _, cc in enumerate(range(random.randint(1, max_contracts))):
+                c_status: uuid = contract_statuses.at[random.randint(0, len(contract_statuses) - 1), "local_id"]
+                c_type: uuid = contract_types.at[random.randint(0, len(contract_types) - 1), "local_id"]
 
-        for _, cc in enumerate(range(random.randint(1, max_contracts))):
-            c_status: uuid = contract_statuses.at[random.randint(0, len(contract_statuses) - 1), "local_id"]
-            c_type: uuid = contract_types.at[random.randint(0, len(contract_types) - 1), "local_id"]
+                if _ == 0 or random.random() < 0.8:
+                    # First contract in the set always is root
+                    # OR
+                    # We assume that about 80% of contracts has no sub-contracts
+                    p = ContractEntity(project_id=p_id, contract_status=c_status, contract_type=c_type)
+                    c_id = p.get_id()
+                else:
+                    p = ContractEntity(project_id=p_id, contract_status=c_status, contract_type=c_type, parent_id=c_id)
 
-            if _ == 0 or random.random() < 0.8:
-                # First contract in the set always is root
-                # OR
-                # We assume that about 80% of contracts has no sub-contracts
-                p = ContractEntity(project_id=project_id, contract_status=c_status, contract_type=c_type)
-                c_id = p.get_id()
-            else:
-                p = ContractEntity(project_id=project_id, contract_status=c_status, contract_type=c_type, parent_id=c_id)
-
-            c.append(p.get_data())
+                c.append(p.get_data())
 
         return pd.DataFrame(c)
 # end of ContractEntity class
@@ -584,10 +578,10 @@ class ContractParties(FakeBase):
     Represent any single party (participant) of contract.
     Note: current _faker can provide from 2 (two) to 5 (five) contract parties for each project's instance
     """
-    def __init__(self, contract_id, contractors_data: pd.DataFrame, contract_party_types: pd.DataFrame):
+    def __init__(self, contract_id, contractor_id, contract_party_types: pd.DataFrame):
         super().__init__()
         self.fd["contract_id"] = contract_id
-        self.fd["contractor_id"] = contractors_data.at[random.randint(0, len(contractors_data) - 1), "local_id"]
+        self.fd["contractor_id"] = contractor_id
         self.fd["party_type"] = contract_party_types.at[random.randint(0, len(contract_party_types) - 1), "local_id"]
         self.fd["role_description"] = f"Проектная роль № {random.randint(0, 15)}"
         self.fd["activated_at"] = _faker.date_between(start_date=datetime.date(2024, 1, 1),
@@ -606,34 +600,28 @@ class ContractParties(FakeBase):
         return f'contract party: {self.fd["contract_id"]} / {self.fd["contractor_id"]} - {self.fd["party_type"]} role: {self.fd["role_description"]}'
 
     @staticmethod
-    def generate(contract_data: pd.DataFrame, contractors: pd.DataFrame, contract_party_types: pd.DataFrame,
-                 max_contracts: int = 10) -> pd.DataFrame:
+    def generate(contract_id_set: [], contractor_id_set: [], contract_party_types: pd.DataFrame) -> pd.DataFrame:
         """
         Generate fresh new set of contract/participant relations.
-        :param contract_data: pandas.DataFrame represents current set of contracts for randomly selection
-        :param contractors: pandas.DataFrame represents current set of contractor entities for randomly selection
+        :param contract_id_set: set of unique local_id's of contracts to establish contract/participant relationships
+        :param contractor_id_set: set of unique local_id's of contractors to be assigned as contract participant
         as contract's participant
         :param contract_party_types: pandas.DataFrame represents type of participation for selected participant.
-        :param max_contracts: Number of contracts to be processed
         :return: pandas.DataFrame filled with fresh new data
         in accordance with data-schema as it can be loaded from production DB
         """
+        max_contracts = len(contract_id_set)
         assert max_contracts > 0, "max_contracts LE ZERO"
         assert max_contracts < 10, "max_contracts too big"
-        assert len(contract_data) > max_contracts * 2, "contract_data too short"
-        assert len(contractors) > max_contracts * 2, "Contractor's set too short"
+        assert len(contractor_id_set) > max_contracts * 4, f"Contractor's set too short must be at least of {max_contracts * 4} items"
         assert len(contract_party_types) > 0, "contract_party_types is empty"
 
-        p_list = set()
-        while len(p_list) < max_contracts:
-            idx = random.randint(0, len(contract_data) - 1)
-            p_list.add(contract_data.at[idx, "local_id"])
-
         c = list()
-        for p_id in p_list:
+        for c_id in set(contract_id_set):
             # Number of contract parties is at least 2 and max of 4
             for _ in range(random.randint(2, 5)):
-                p = ContractParties(contract_id=p_id, contractors_data=contractors,
+                p = ContractParties(contract_id=c_id,
+                                    contractor_id=random.choice(contractor_id_set),
                                     contract_party_types=contract_party_types)
                 c.append(p.get_data())
 
