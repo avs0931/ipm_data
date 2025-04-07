@@ -19,22 +19,23 @@ class FakeBase():
         self._ii = integration_issue()
         self.fd = dict()
         self.fd["local_id"]: Any = uuid.uuid4()
+        self.ii_include: bool = False
 
     def get_id(self) -> uuid:
         return self.fd["local_id"]
 
-    def get_headers(self, ii_include: bool = True):
+    def get_headers(self):
         output = list(self.fd.keys())
-        if ii_include:
+        if self.ii_include:
             output.append(self._ii.get_headers())
         return "\t".join(output)
 
     def get_data(self):
-        return self.fd
+        return self.fd | self._ii.get_data() if self.ii_include else self.fd
 
-    def get_csv(self, ii_include: bool = True):
+    def get_csv(self):
         output = list(map(lambda x: str(x), self.fd.values()))
-        if ii_include:
+        if self.ii_include:
             output.append(self._ii.get_csv())
         return "\t".join(output)
 # end of FakeBase class
@@ -145,16 +146,17 @@ class PersonalityEntity(FakeBase):
 
     def __init__(self):
         super().__init__()
+        self.ii_include = True  # Create with integration meta
         if random.random() < self._mf_ratio:
-            self.fd["gender"] = "муж"
             self.fd["last_name"] = _faker.last_name_male()
             self.fd["first_name"] = _faker.first_name_male()
             self.fd["second_name"] = _faker.middle_name_male()
+            self.fd["gender"] = "муж"
         else:
-            self.fd["gender"] = "жен"
             self.fd["last_name"] = _faker.last_name_female()
             self.fd["first_name"] = _faker.first_name_female()
             self.fd["second_name"] = _faker.middle_name_female()
+            self.fd["gender"] = "жен"
 
         self.fd["birth_date"] = _faker.date_between(start_date=datetime.date(1970, 1, 1),
                                                     end_date=datetime.date(2000, 12, 31))
@@ -194,6 +196,7 @@ class ContractorEntity(FakeBase):
         company's bank office service.
         """
         super().__init__()
+        self.ii_include = True    # Create with integration meta
         # Seed bank-related data
         bank_idx = random.randint(0, len(bank_data) - 1)
         bank_id = str(bank_data.at[bank_idx, "local_id"])
@@ -258,7 +261,7 @@ class ContractorPersonnel(FakeBase):
         as and employee
         """
         super().__init__()
-        # Seed perssoned-related data - we will use it as employee id
+        # Seed personal-related data - we will use it as employee id
         idx = random.randint(0, len(personal_data) - 1)
         emp_id = str(personal_data.at[idx, "local_id"])
         self.fd["contractor_id"] = contractor_id
@@ -323,6 +326,7 @@ class ProjectEntity(FakeBase):
         :param types: pandas.DataFrame contains current set of allowed types for any project's instance
         """
         super().__init__()
+        self.ii_include = True  # Create with integration meta
         self.fd[
             "external_code"] = f"Внешний код проекта: {random.randint(0, 1500)} / {_faker.date_between(start_date=datetime.date(2024, 1, 1), end_date=datetime.date(2025, 2, 28))}"
         self.fd["project_name"] = f"Газопровод {_faker.city()} - {_faker.city()}"
@@ -505,11 +509,12 @@ class ContractEntity(FakeBase):
         :param parent_id: id of 'parent' contract (i.e. contract that the creating contract will expand of amend)
         """
         super().__init__()
+        self.ii_include = True  # Create with integration meta
         object_no = f"{random.randint(0, 1500)} / {_faker.date_between(start_date=datetime.date(2024, 1, 1), end_date=datetime.date(2025, 2, 28))}"
         self.fd["project_id"] = project_id
         self.fd["contract_number"] = object_no
         self.fd["contract_date"] = _faker.date_between(start_date=datetime.date(2024, 1, 1),
-                                                       end_date=datetime.date.today()) if random.random() < 0.8 else ""
+                                                       end_date=datetime.date.today())
         self.fd["contract_subject"] = f'{random.choice(["СМР", "ПИР", "ПНР"])} по объекту {object_no}'
         self.fd["contract_value"] = 1_000_000_000 * random.random()
         self.fd["contract_status"] = contract_status
@@ -582,6 +587,7 @@ class ContractParties(FakeBase):
         super().__init__()
         self.fd["contract_id"] = contract_id
         self.fd["contractor_id"] = contractor_id
+        self.fd["is_customer"] = True if random.random() < 0.5 else False
         self.fd["party_type"] = contract_party_types.at[random.randint(0, len(contract_party_types) - 1), "local_id"]
         self.fd["role_description"] = f"Проектная роль № {random.randint(0, 15)}"
         self.fd["activated_at"] = _faker.date_between(start_date=datetime.date(2024, 1, 1),

@@ -19,6 +19,9 @@ class integration_issue:
     def get_csv(self):
         return "\t".join(list(map(lambda x: str(x), self.fd.values())))
 
+    def get_data(self) -> {}:
+        return self.fd
+
     def __str__(self):
         return (
             f'{self.fd["meta_source_name"]}: version: {self.fd["meta_source_row_version"]} / loaded at: {self.fd["meta_source_row_loaded_at"]}')

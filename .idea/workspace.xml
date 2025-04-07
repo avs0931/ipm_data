@@ -4,10 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="db5e771c-0692-420e-b3d7-81df038abe0a" name="Changes" comment="Create DataFaker.DataItem component.&#10;All ld_xxx local dictionaries generated and saved successfully.&#10;Establish DataFaker.E_Types enumeration to support data manipulation.">
+    <list default="true" id="db5e771c-0692-420e-b3d7-81df038abe0a" name="Changes" comment="DataFaker - data generation tests passed. All non-real (fake) data components are generating.&#10;&#10;Change logic of compound (pk/fk) generation. It now aligned with data requirements.&#10;&#10;Data generation has 3 phases to complete all dependency generations.">
+      <change afterPath="$PROJECT_DIR$/DB_Helpers/hand_loader.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/Config/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DB_Helpers/pg_helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/DB_Helpers/pg_helper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Datagen/DataFaker.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datagen/DataFaker.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Datagen/Datagen_issues.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datagen/Datagen_issues.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Datagen/Integration_issues.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datagen/Integration_issues.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/c2s/Templates/table_template_01.csv" beforeDir="false" afterPath="$PROJECT_DIR$/c2s/Templates/table_template_01.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/c2s/csv2sql.py" beforeDir="false" afterPath="$PROJECT_DIR$/c2s/csv2sql.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/c2s/data_table.py" beforeDir="false" afterPath="$PROJECT_DIR$/c2s/data_table.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,6 +50,8 @@
   "keyToString": {
     "Python.DataFaker.executor": "Run",
     "Python.csv2sql.executor": "Run",
+    "Python.data_table.executor": "Run",
+    "Python.hand_loader.executor": "Run",
     "Python.pg_helper.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
@@ -54,6 +63,9 @@
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\aa.vasilyev\Desktop\DEV\Python\ipm_data\ipm_data\Data\Datagen\csv" />
       <recent name="C:\Users\aa.vasilyev\Desktop\DEV\Python\ipm_data\ipm_data\csv2sql\Templates" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\aa.vasilyev\Desktop\DEV\Python\ipm_data\ipm_data\Data\Sqlgen" />
     </key>
   </component>
   <component name="RunManager">
@@ -120,7 +132,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743886724680</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="DataFaker - data generation tests passed. All non-real (fake) data components are generating.&#10;&#10;Change logic of compound (pk/fk) generation. It now aligned with data requirements.&#10;&#10;Data generation has 3 phases to complete all dependency generations.">
+      <option name="closed" value="true" />
+      <created>1743948876580</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1743948876580</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -138,7 +158,8 @@
     <MESSAGE value="Project initiated.&#10;Implements basic config:&#10; - DB section&#10; - C2S (csv2sql) section&#10;&#10;Testing DB runners:&#10; - execute(f)&#10; - execute(f)_one&#10; - execute(f)_all&#10; &#10;Testing c2s functionality" />
     <MESSAGE value="Transfer data faker logic from Jupiter notebook to Datagen_issues.py module.&#10;&#10;Apply detailed comments to each component of Datagen_issues.py&#10;&#10;Result not tested yet!" />
     <MESSAGE value="Create DataFaker.DataItem component.&#10;All ld_xxx local dictionaries generated and saved successfully.&#10;Establish DataFaker.E_Types enumeration to support data manipulation." />
-    <option name="LAST_COMMIT_MESSAGE" value="Create DataFaker.DataItem component.&#10;All ld_xxx local dictionaries generated and saved successfully.&#10;Establish DataFaker.E_Types enumeration to support data manipulation." />
+    <MESSAGE value="DataFaker - data generation tests passed. All non-real (fake) data components are generating.&#10;&#10;Change logic of compound (pk/fk) generation. It now aligned with data requirements.&#10;&#10;Data generation has 3 phases to complete all dependency generations." />
+    <option name="LAST_COMMIT_MESSAGE" value="DataFaker - data generation tests passed. All non-real (fake) data components are generating.&#10;&#10;Change logic of compound (pk/fk) generation. It now aligned with data requirements.&#10;&#10;Data generation has 3 phases to complete all dependency generations." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -157,6 +178,21 @@
           <url>file://$PROJECT_DIR$/Datagen/DataFaker.py</url>
           <line>183</line>
           <option name="timeStamp" value="17" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/c2s/csv2sql.py</url>
+          <line>145</line>
+          <option name="timeStamp" value="19" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/c2s/csv2sql.py</url>
+          <line>120</line>
+          <option name="timeStamp" value="21" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/c2s/data_table.py</url>
+          <line>27</line>
+          <option name="timeStamp" value="22" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

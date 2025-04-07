@@ -3,6 +3,7 @@ import copy
 import Config.config as Cfg
 from App_Helpers.Logger import *
 from c2s.data_table import data_table
+from DB_Helpers.pg_helper import touch_db
 
 
 def boil_tables(template_file: Any, ns_prefix: str = "") -> []:
@@ -57,30 +58,40 @@ def boil_tables(template_file: Any, ns_prefix: str = "") -> []:
 # end of boil_tables()
 
 
-def sql_codegen(template_data_file: str):
-    assert template_data_file, "No template file"
-    # ----------------------------------------
-    # Boilerplate
-    # Generate SQL-scripts
-    # ----------------------------------------
+def sql_codegen(template_source: str, template_output: str, sql_dir: str, csv_dir: str, target_db_name: str, ns_prefix: str = ""):
+    assert template_source, "No Template file"
+    assert os.path.exists(template_source) and os.path.isfile(template_source), \
+        f"Template file not found: '{template_source}'"
+    assert os.path.exists(sql_dir), f"sql_dir not found: '{sql_dir}'"
+    assert os.path.exists(csv_dir), f"csv_dir not found: '{csv_dir}'"
 
-    # Set-up files
-    template_file = os.path.join(Cfg.C2S_templates_path, template_data_file)
-    sql_dir = Cfg.C2S_upload_sql_path
-    csv_dir = Cfg.C2S_upload_data_path
-    output_file = os.path.join(Cfg.C2S_upload_sql_path, r"table_templates.sql")
+    trc_print("***************************************************************************")
+    trc_print("*")
+    trc_print("* SQL CODE GENERATION IS RUNNING")
+    trc_print("*")
+    trc_print("***************************************************************************")
+    trc_print(f" * Source file: '{template_source}'")
+    trc_print(f" * Output file: '{template_output}'")
+    trc_print(f" * SQL Loaders: '{sql_dir}'")
+    trc_print(f" * CSV schemas: '{csv_dir}'")
+    trc_print(f" *   NS Prefix: '{ns_prefix}'")
+    if not touch_db(target_db_name):
+        wrn_print(f"Can't touch target database: '{target_db_name}'")
+    else:
+        trc_print(f" * DB '{target_db_name}' seems touchable")
+    trc_print("***************************************************************************")
 
     # Generate SQL definitions
-    tables = boil_tables(template_file=template_file, ns_prefix=Cfg.C2S_ns_prefix)
+    tables = boil_tables(template_file=template_file, ns_prefix=ns_prefix)
 
-    print(f"Tables: {len(tables)}")
+    trc_print(f"Tables: {len(tables)}")
 
-    # Write Creation scripts out
-    with open(output_file, mode="w", encoding="utf-8") as of:
+    # Write Templated scripts out
+    with open(template_output, mode="w", encoding="utf-8") as of:
         # output DROP TABLE statements in reverse order
         print(f"\n-- Below is a list of DROP TABLE Statements in reverse order", file=of)
         for td in tables[::-1]:
-            print(td.drop_table_stmt(), file=of)
+            print(td.drop_table_stmt(force_comment=False), file=of)
 
         for td in tables:
             print(f"\n-- Table definition: {td.get_name()}", file=of)
@@ -88,20 +99,25 @@ def sql_codegen(template_data_file: str):
             print(td.create_stmt(), file=of)
             print("------------------\n", file=of)
 
-    dbg_print(" --- ")
+    trc_print("***************************************************************************")
+    trc_print(" * Data Tables Templating Done!")
+    trc_print("***************************************************************************")
+    trc_print(" * Generate Data Loaders and CSV Schemas")
+    trc_print("***************************************************************************")
 
     # Write data loading scripts
-    data_path = os.path.join(Cfg.C2S_upload_data_path)
-    if not os.path.exists(data_path):
-        os.mkdir(data_path)
+    if not os.path.exists(csv_dir):
+        os.mkdir(csv_dir)
 
     for td in tables:
         tn = td.get_name()
         # Write sql-section
+        # SQL loader will be placed here:
         sql_file = os.path.join(sql_dir, f"{tn}.sql")
-        data_file = os.path.join(csv_dir, f"{tn}.csv")
+        # Create path to underlined data file to insert into loader
+        # Note: strip out ns_prefix
+        data_file_path = os.path.join(csv_dir, f"{td.get_name(use_prefix=False)}.csv")
         with open(sql_file, mode="w", encoding="utf-8") as of:
-            print(f"Data copy for: {tn:<32} ... ", end="")
             print(f"-- Data loader for table: {tn}", file=of)
             print(f"-- Uncomment next line if you want to completely refresh current data...", file=of)
             print(f"{td.truncate_stmt()}", file=of)
@@ -110,22 +126,28 @@ def sql_codegen(template_data_file: str):
             print(f"-- Make sure that the prepared and filled csv-file is reachable by DB Upload directory: '{sql_dir}'",
                   file=of)
             print("------------------\n", file=of)
-            print(f"{td.copy_stmt(data_file=data_file)}", file=of)
-            print(f" done with file: '{output_file}'")
+            print(f"{td.copy_stmt(data_file=data_file_path)}", file=of)
             of.close()
 
+        trc_print(f"Data loader for: '{tn:<32}'  done with file: '{sql_file}'")
+    # trc_print("***************************************************************************")
+    # trc_print(" * Data Loaders Done!")
+    # trc_print("***************************************************************************")
+    # trc_print(" * Generate CSV-schemas")
+    # trc_print("***************************************************************************")
+
         # Write csv-section
-        datafile_mark = "data"
-        output_file = os.path.join(data_path, f"{tn}_{datafile_mark}.csv")
+        datafile_mark = "schema"
+        output_file = os.path.join(csv_dir, f"{tn}_{datafile_mark}.csv")
         with open(output_file, mode="w", encoding="utf-8") as of:
             # Get list of loadable columns
             llist = td.get_loadable()
             # Get set of indexes
-            ilist = [i for i in range(0, len(llist))]
-            # Write out type of data - this will be need not remove
+            index_list = [str(i) for i in range(0, len(llist))]
+            # Write out type of data - this will need to remove
             print(f"{tn}", file=of)
-            # Write out indexes - this will be need to remove
-            csv_line = "\t".join(map(lambda x: str(x), ilist))
+            # Write out column indexes - this will be need to remove
+            csv_line = "\t".join(index_list)
             print(f"{csv_line}", file=of)
             # Write out headers - this is the first row of real data set
             csv_line = "\t".join(llist)
@@ -136,5 +158,42 @@ def sql_codegen(template_data_file: str):
 # ##############################
 # Local test site
 if __name__ == '__main__':
-    template_file = "table_template_01.csv"
-    sql_codegen(template_file)
+    trc_print(f"Running from '{os.getcwd()}'")
+    config_ns_prefix: str = Cfg.C2S_ns_prefix
+    # Configure in/out file names
+    # template_in: str = Cfg.C2S_template_file  # This is configured file source
+    # template_in: str = r"table_template_02.csv"
+
+    # 2025-04-07:
+    # ld_xxx references: change 'dict_string_value' to 'local_id'
+    # template_in: str = r"table_template_03.csv"
+
+    # 2025-04-07:
+    # 1. construction_sites renamed to construction_sites
+    # 2. Remove NOT NULL constraints from primary_site references
+    # template_in: str = r"table_template_04.csv"
+
+    # 2025-04-07
+    # Remove NOT NULL constraints from activated_at for tables [project_parties] and [contract_parties]
+    template_in: str = r"table_template_05.csv"
+
+
+    template_out: str = "_".join([config_ns_prefix, r"templates.sql"]).strip("_").lower()
+
+    # Configure paths
+    # Substitute config path with local/debug
+    # template_path = Cfg.C2S_templates_path
+    template_path: str = r".\Templates"
+    template_file: str = os.path.join(template_path, template_in)
+    template_output: str = os.path.join(Cfg.C2S_upload_sql_path, template_out)
+    # Configure loader paths: sql-scripts and csv-data
+    sql_scripts_dir: str = Cfg.C2S_upload_sql_path
+    csv_data_dir: str = Cfg.C2S_upload_data_path
+
+    # Test run sql_codegen
+    sql_codegen(template_source=template_file,
+                template_output=template_output,
+                sql_dir=sql_scripts_dir,
+                csv_dir=csv_data_dir,
+                target_db_name="test",
+                ns_prefix=config_ns_prefix)

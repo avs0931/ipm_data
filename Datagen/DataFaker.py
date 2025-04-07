@@ -67,7 +67,7 @@ class E_Types(Enum):
     ld_resource_logistics_guide = 12   # Resource's logistics params.                    Real, local, loadable.
     ld_local_doc_contexts = 13         # Types of document context.                      Fake, local, generated.
     bank_entity = 14                   # Bank offices.                                   Real, local, loadable
-    construction_site = 15             # Construction Sites.                             Fake, cache, generated.
+    construction_sites = 15             # Construction Sites.                             Fake, cache, generated.
     contract_entity = 16               # Contracts Guide.                                Fake, cache, generated.
     contract_parties = 17              # Contract participants (Contract/Contractors).   Fake, cache, generated.
     contractor_entity = 18             # Contractors / Companies.                        Fake, cache, generated.
@@ -277,7 +277,7 @@ def data_gen(item_type: E_Types, data_dict: {}) -> pd.DataFrame:
     elif item_type == E_Types.bank_entity:
         wrn_print(f"Data with key: '{item_type.name}' is real and can't be generated")
 
-    elif item_type == E_Types.construction_site:
+    elif item_type == E_Types.construction_sites:
         # wrn_print(f"Not implemented: generation for key '{item_type.name}'")
         p_itm = _get_item_by_type(E_Types.project_entity)
         if p_itm is not None and p_itm.has_data():
