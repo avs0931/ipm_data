@@ -1,4 +1,5 @@
 import os
+import shutil
 import copy
 import Config.config as Cfg
 from App_Helpers.Logger import *
@@ -130,11 +131,8 @@ def sql_codegen(template_source: str, template_output: str, sql_dir: str, csv_di
             of.close()
 
         trc_print(f"Data loader for: '{tn:<32}'  done with file: '{sql_file}'")
-    # trc_print("***************************************************************************")
-    # trc_print(" * Data Loaders Done!")
-    # trc_print("***************************************************************************")
-    # trc_print(" * Generate CSV-schemas")
-    # trc_print("***************************************************************************")
+
+        #     # ****************************************************************")
 
         # Write csv-section
         datafile_mark = "schema"
@@ -153,6 +151,25 @@ def sql_codegen(template_source: str, template_output: str, sql_dir: str, csv_di
             csv_line = "\t".join(llist)
             print(f"{csv_line}", file=of)
             of.close()
+# end of sql_codegen()
+
+
+def restore_real(real_sql_path: str, generation_path: str) -> int:
+    """Copy the 'real_data' loaders to directory contains all generated data
+    :param: real_path to directory contains real-data sql files (i.e. copy-from)
+    :param: generation_path: path  to directory contains generated sql-files (i.e. copy-to)
+    :return: Number of flies restored
+    """
+    assert os.path.exists(real_sql_path), f"Path to real csv-data files not found: '{real_sql_path}'"
+    assert os.path.exists(generation_path), f"Path to generating csv-data files not found: '{generation_path}'"
+    r_files = [f for f in os.listdir(real_sql_path) if f.endswith("sql")]
+    for f in r_files:
+        r = os.path.join(real_sql_path, f)
+        if os.path.isfile(r):
+            shutil.copy(r, generation_path)
+
+    return len(r_files)
+# end of restore_real()
 
 
 # ##############################
@@ -177,15 +194,15 @@ if __name__ == '__main__':
     # Remove NOT NULL constraints from activated_at for tables [project_parties] and [contract_parties]
     template_in: str = r"table_template_05.csv"
 
-
     template_out: str = "_".join([config_ns_prefix, r"templates.sql"]).strip("_").lower()
 
     # Configure paths
     # Substitute config path with local/debug
     # template_path = Cfg.C2S_templates_path
+    gen_path = Cfg.C2S_upload_sql_path
     template_path: str = r".\Templates"
     template_file: str = os.path.join(template_path, template_in)
-    template_output: str = os.path.join(Cfg.C2S_upload_sql_path, template_out)
+    template_output: str = os.path.join(gen_path, template_out)
     # Configure loader paths: sql-scripts and csv-data
     sql_scripts_dir: str = Cfg.C2S_upload_sql_path
     csv_data_dir: str = Cfg.C2S_upload_data_path
@@ -197,3 +214,18 @@ if __name__ == '__main__':
                 csv_dir=csv_data_dir,
                 target_db_name="test",
                 ns_prefix=config_ns_prefix)
+
+    trc_print("***************************************************************************")
+    trc_print(" * SQL Generation Done!")
+
+    # Restore loaders for real-data files
+    real_sql_path = os.path.join(gen_path, "real_data_loaders")
+    trc_print("***************************************************************************")
+    trc_print(f"* Restoring real data loaders from '{real_sql_path}'")
+
+    rf = restore_real(real_sql_path=real_sql_path, generation_path=gen_path)
+    trc_print("***************************************************************************")
+    trc_print(f"* {rf} real data loaders has been placed into '{gen_path}' directory")
+
+    # SQL Generation done!
+    trc_print("***************************************************************************")

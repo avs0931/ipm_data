@@ -4,17 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="db5e771c-0692-420e-b3d7-81df038abe0a" name="Changes" comment="DataFaker - data generation tests passed. All non-real (fake) data components are generating.&#10;&#10;Change logic of compound (pk/fk) generation. It now aligned with data requirements.&#10;&#10;Data generation has 3 phases to complete all dependency generations.">
-      <change afterPath="$PROJECT_DIR$/DB_Helpers/hand_loader.py" afterDir="false" />
+    <list default="true" id="db5e771c-0692-420e-b3d7-81df038abe0a" name="Changes" comment="Initial generation and data load tests passed.&#10;Updates:&#10;1. Fix data schema mismatches:&#10; - ld_xxx references: changed from 'dict_string_value' to 'local_id' (table_template_03.csv)&#10; - [construction_site] renamed to [construction_sites] (table_template_04.csv)&#10; - NOT NULL constraints on [primary_site] references has been removed (table_template_04.csv)&#10; - NOT NULL constraints on [activated_at] for tables [project_parties] and [contract_parties] has been removed (table_template_05.csv)&#10; &#10;2. DataTable class:&#10; - add option to generate table name with (default) or without namespace prefix&#10;&#10;3.  PersonalityEntity generator:&#10; - fix positioning for [gender] field.&#10;&#10;4. ContractParties generator:&#10; - fix omitted field [is_customer]&#10; &#10;5. ContractEntity generator:&#10; - fix optionality for [contract_date] field. Now it is not optional and always generated. Entity of Contract is invalid without this value.&#10; &#10; 6. Create and test hand_loader module: it is needs for data loading automation: by execute loading scripts one-by-one. Fix the right order of data loading.&#10; &#10; 7. DataTable class:&#10;  - add option to expand business data definitions with data integration issues">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/Config/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DB_Helpers/pg_helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/DB_Helpers/pg_helper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DB_Helpers/hand_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/DB_Helpers/hand_loader.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Datagen/DataFaker.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datagen/DataFaker.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Datagen/Datagen_issues.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datagen/Datagen_issues.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Datagen/Integration_issues.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datagen/Integration_issues.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/c2s/Templates/table_template_01.csv" beforeDir="false" afterPath="$PROJECT_DIR$/c2s/Templates/table_template_01.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/c2s/csv2sql.py" beforeDir="false" afterPath="$PROJECT_DIR$/c2s/csv2sql.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/c2s/data_table.py" beforeDir="false" afterPath="$PROJECT_DIR$/c2s/data_table.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,22 +45,25 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Python.DataFaker.executor": "Run",
+    "Python.Datagen_issues.executor": "Run",
     "Python.csv2sql.executor": "Run",
     "Python.data_table.executor": "Run",
     "Python.hand_loader.executor": "Run",
     "Python.pg_helper.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
-    "last_opened_file_path": "C:/Users/aa.vasilyev/Desktop/DEV/Python/ipm_data/ipm_data/Data/Datagen/csv",
+    "last_opened_file_path": "C:/Users/aa.vasilyev/Desktop/DEV/Python/ipm_data/ipm_data/Data/Datagen/csv/real_data",
     "settings.editor.selected.configurable": "preferences.fileTypes"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\aa.vasilyev\Desktop\DEV\Python\ipm_data\ipm_data\Data\Datagen\csv\real_data" />
       <recent name="C:\Users\aa.vasilyev\Desktop\DEV\Python\ipm_data\ipm_data\Data\Datagen\csv" />
       <recent name="C:\Users\aa.vasilyev\Desktop\DEV\Python\ipm_data\ipm_data\csv2sql\Templates" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\aa.vasilyev\Desktop\DEV\Python\ipm_data\ipm_data\Data\Datagen\csv" />
       <recent name="C:\Users\aa.vasilyev\Desktop\DEV\Python\ipm_data\ipm_data\Data\Sqlgen" />
     </key>
   </component>
@@ -140,7 +139,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743948876580</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Initial generation and data load tests passed.&#10;Updates:&#10;1. Fix data schema mismatches:&#10; - ld_xxx references: changed from 'dict_string_value' to 'local_id' (table_template_03.csv)&#10; - [construction_site] renamed to [construction_sites] (table_template_04.csv)&#10; - NOT NULL constraints on [primary_site] references has been removed (table_template_04.csv)&#10; - NOT NULL constraints on [activated_at] for tables [project_parties] and [contract_parties] has been removed (table_template_05.csv)&#10; &#10;2. DataTable class:&#10; - add option to generate table name with (default) or without namespace prefix&#10;&#10;3.  PersonalityEntity generator:&#10; - fix positioning for [gender] field.&#10;&#10;4. ContractParties generator:&#10; - fix omitted field [is_customer]&#10; &#10;5. ContractEntity generator:&#10; - fix optionality for [contract_date] field. Now it is not optional and always generated. Entity of Contract is invalid without this value.&#10; &#10; 6. Create and test hand_loader module: it is needs for data loading automation: by execute loading scripts one-by-one. Fix the right order of data loading.&#10; &#10; 7. DataTable class:&#10;  - add option to expand business data definitions with data integration issues">
+      <option name="closed" value="true" />
+      <created>1744028354976</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1744028354976</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -159,7 +166,8 @@
     <MESSAGE value="Transfer data faker logic from Jupiter notebook to Datagen_issues.py module.&#10;&#10;Apply detailed comments to each component of Datagen_issues.py&#10;&#10;Result not tested yet!" />
     <MESSAGE value="Create DataFaker.DataItem component.&#10;All ld_xxx local dictionaries generated and saved successfully.&#10;Establish DataFaker.E_Types enumeration to support data manipulation." />
     <MESSAGE value="DataFaker - data generation tests passed. All non-real (fake) data components are generating.&#10;&#10;Change logic of compound (pk/fk) generation. It now aligned with data requirements.&#10;&#10;Data generation has 3 phases to complete all dependency generations." />
-    <option name="LAST_COMMIT_MESSAGE" value="DataFaker - data generation tests passed. All non-real (fake) data components are generating.&#10;&#10;Change logic of compound (pk/fk) generation. It now aligned with data requirements.&#10;&#10;Data generation has 3 phases to complete all dependency generations." />
+    <MESSAGE value="Initial generation and data load tests passed.&#10;Updates:&#10;1. Fix data schema mismatches:&#10; - ld_xxx references: changed from 'dict_string_value' to 'local_id' (table_template_03.csv)&#10; - [construction_site] renamed to [construction_sites] (table_template_04.csv)&#10; - NOT NULL constraints on [primary_site] references has been removed (table_template_04.csv)&#10; - NOT NULL constraints on [activated_at] for tables [project_parties] and [contract_parties] has been removed (table_template_05.csv)&#10; &#10;2. DataTable class:&#10; - add option to generate table name with (default) or without namespace prefix&#10;&#10;3.  PersonalityEntity generator:&#10; - fix positioning for [gender] field.&#10;&#10;4. ContractParties generator:&#10; - fix omitted field [is_customer]&#10; &#10;5. ContractEntity generator:&#10; - fix optionality for [contract_date] field. Now it is not optional and always generated. Entity of Contract is invalid without this value.&#10; &#10; 6. Create and test hand_loader module: it is needs for data loading automation: by execute loading scripts one-by-one. Fix the right order of data loading.&#10; &#10; 7. DataTable class:&#10;  - add option to expand business data definitions with data integration issues" />
+    <option name="LAST_COMMIT_MESSAGE" value="Initial generation and data load tests passed.&#10;Updates:&#10;1. Fix data schema mismatches:&#10; - ld_xxx references: changed from 'dict_string_value' to 'local_id' (table_template_03.csv)&#10; - [construction_site] renamed to [construction_sites] (table_template_04.csv)&#10; - NOT NULL constraints on [primary_site] references has been removed (table_template_04.csv)&#10; - NOT NULL constraints on [activated_at] for tables [project_parties] and [contract_parties] has been removed (table_template_05.csv)&#10; &#10;2. DataTable class:&#10; - add option to generate table name with (default) or without namespace prefix&#10;&#10;3.  PersonalityEntity generator:&#10; - fix positioning for [gender] field.&#10;&#10;4. ContractParties generator:&#10; - fix omitted field [is_customer]&#10; &#10;5. ContractEntity generator:&#10; - fix optionality for [contract_date] field. Now it is not optional and always generated. Entity of Contract is invalid without this value.&#10; &#10; 6. Create and test hand_loader module: it is needs for data loading automation: by execute loading scripts one-by-one. Fix the right order of data loading.&#10; &#10; 7. DataTable class:&#10;  - add option to expand business data definitions with data integration issues" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -170,23 +178,13 @@
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Datagen/DataFaker.py</url>
-          <line>375</line>
-          <option name="timeStamp" value="16" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Datagen/DataFaker.py</url>
-          <line>183</line>
-          <option name="timeStamp" value="17" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/c2s/csv2sql.py</url>
-          <line>145</line>
+          <line>143</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/c2s/csv2sql.py</url>
-          <line>120</line>
+          <line>121</line>
           <option name="timeStamp" value="21" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

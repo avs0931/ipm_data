@@ -1,9 +1,14 @@
 from enum import Enum
+import shutil
 import os
 import pandas as pd
 import Config.config as Cfg
 from App_Helpers.Logger import *
 from Datagen.Datagen_issues import *
+
+# FAKER SOURCE:
+# https://faker.readthedocs.io/en/stable/locales/ru_RU.html#faker.providers.date_time.ru_RU.Provider.date_between
+
 
 # Here - Main logic and routines to provide data generation
 # and prepare files to DB Loading.
@@ -67,7 +72,7 @@ class E_Types(Enum):
     ld_resource_logistics_guide = 12   # Resource's logistics params.                    Real, local, loadable.
     ld_local_doc_contexts = 13         # Types of document context.                      Fake, local, generated.
     bank_entity = 14                   # Bank offices.                                   Real, local, loadable
-    construction_sites = 15             # Construction Sites.                             Fake, cache, generated.
+    construction_sites = 15             # Construction Sites.                            Fake, cache, generated.
     contract_entity = 16               # Contracts Guide.                                Fake, cache, generated.
     contract_parties = 17              # Contract participants (Contract/Contractors).   Fake, cache, generated.
     contractor_entity = 18             # Contractors / Companies.                        Fake, cache, generated.
@@ -161,13 +166,15 @@ class DataItem:
         """
         return self._load_path
 
-    def get_unique_id_set(self, set_length: int):
+    def get_unique_id_set(self, set_length: int = 0):
         """
         Create instance-level set of unique local_id's to provide uniform PK/FK relationships during data generation
         :param set_length: number of unique local_id in selection
         :return: set (unique) of local_id's
         """
         assert self.has_data(), f"Can't provide unique id set for type: '{self.get_item_type_name()}' - there is no data"
+        if set_length == 0:
+            set_length = self.data_len()
         assert set_length <= self.data_len()
         if len(self._unique_id_set) == 0:
             self._unique_id_set = random.sample(list(self.get_data()["local_id"]), set_length)
@@ -269,7 +276,9 @@ def data_gen(item_type: E_Types, data_dict: {}) -> pd.DataFrame:
         wrn_print(f"Data with key: '{item_type.name}' is real and can't be generated")
 
     elif item_type == E_Types.ld_resource_logistics_guide:
-        wrn_print(f"Data with key: '{item_type.name}' is real and can't be generated")
+        p_itm = _get_item_by_type(E_Types.ld_resource_group_guide)
+        pid_set = p_itm.get_unique_id_set()
+        pt_data = ResourceLogisticGuide.generate(group_id_set=pid_set)
 
     elif item_type == E_Types.ld_local_doc_contexts:
         wrn_print(f"Not implemented: generation for key '{item_type.name}'")
@@ -278,7 +287,6 @@ def data_gen(item_type: E_Types, data_dict: {}) -> pd.DataFrame:
         wrn_print(f"Data with key: '{item_type.name}' is real and can't be generated")
 
     elif item_type == E_Types.construction_sites:
-        # wrn_print(f"Not implemented: generation for key '{item_type.name}'")
         p_itm = _get_item_by_type(E_Types.project_entity)
         if p_itm is not None and p_itm.has_data():
             max_project = 5
@@ -357,8 +365,35 @@ def data_gen(item_type: E_Types, data_dict: {}) -> pd.DataFrame:
 # end of data_gen()
 
 
+def restore_real(real_data_path: str, generation_path: str) -> int:
+    """Copy the 'real_data' files to directory contains all generated data
+    :param: real_path to directory contains real-data csv files (i.e. copy-from)
+    :param: generation_path: path  to directory contains generated csv-files (i.e. copy-to)
+    :return: Number of flies restored
+    """
+    assert os.path.exists(real_data_path), f"Path to real csv-data files not found: '{real_data_path}'"
+    assert os.path.exists(generation_path), f"Path to generating csv-data files not found: '{generation_path}'"
+    r_files = [f for f in os.listdir(real_data_path) if f.endswith("csv")]
+    for f in r_files:
+        r = os.path.join(real_data_path, f)
+        if os.path.isfile(r):
+            shutil.copy(r, generation_path)
+
+    return len(r_files)
+# end of restore_real()
+
+
 def data_init():
     data_dict = {}
+
+    # Set-up paths
+    gen_path = Cfg.DG_generation_data_path
+    real_data_path = os.path.join(gen_path, "real_data")
+
+    trc_print(f"Restoring real data first from '{real_data_path}'")
+    rf = restore_real(real_data_path=real_data_path, generation_path=gen_path)
+    trc_print(f"{rf} real data files has been placed into '{gen_path}' directory\n")
+
     for i in range(3):
         trc_print("********************************************************************************************")
         trc_print("*")
@@ -373,7 +408,7 @@ def data_init():
             trc_print("*****")
             trc_print(f"***** '{e_type.name:<32}' is running --------------------------------------------------")
             try:
-                dit = DataItem(item_type=e_type, data_path=Cfg.DG_generation_data_path)
+                dit = DataItem(item_type=e_type, data_path=gen_path)
                 if not dit.has_data():
                     trc_print(f"Try to generate data for type: '{e_type}'")
                     item_data = data_gen(item_type=e_type, data_dict=data_dict)

@@ -51,18 +51,18 @@ script_list = [
     "ch_ld_control_violation_types.sql",
     "ch_ld_executive_doc_types.sql",
     "ch_ld_permissive_doc_types.sql",
+    "ch_ld_measure_unit_guide.sql",
+    "ch_ld_resource_group_guide.sql",
+    "ch_ld_resource_logistics_guide.sql",
     # Not rady to load:
     # "ch_document_base.sql",
     # "ch_ld_local_doc_contexts.sql",
-    # "ch_ld_measure_unit_guide.sql",
-    # "ch_ld_resource_group_guide.sql",
-    # "ch_ld_resource_logistics_guide.sql",
 ]
 
 # List of scripts in execution order
 
 
-def do_load(da_name: str, sql_dir: str, script_set: [], stop_on_error: bool = True):
+def do_load(da_name: str, sql_dir: str, script_set: [], ignore_errors: bool = False):
     assert db_name, "No DB Name"
     assert os.path.exists(sql_dir), f"Path to scripts not found: '{sql_dir}'"
 
@@ -82,7 +82,7 @@ def do_load(da_name: str, sql_dir: str, script_set: [], stop_on_error: bool = Tr
             trc_print(f"Data has been loaded with '{res[0]}' rows")
         except Exception as e:
             err_print("Data loading failed", ex=e)
-            if stop_on_error:
+            if not ignore_errors:
                 break
 # end of do_load()
 

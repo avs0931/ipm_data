@@ -13,7 +13,7 @@ _faker = Faker("ru-RU")
 # ########################################
 
 
-class FakeBase():
+class FakeBase:
     # FakeBase - define some basics for all data generators
     def __init__(self):
         self._ii = integration_issue()
@@ -633,3 +633,60 @@ class ContractParties(FakeBase):
 
         return pd.DataFrame(c)
 # end of ContractParties class
+
+
+# ########################################
+
+
+class ResourceLogisticGuide(FakeBase):
+    """
+    Represent any single set of resource logistic parameters.
+    Note: current _faker can provide from 0 (zero) logistic parameters per each item of [ld_resource_group_guide]
+    """
+    # Logistic's parameters source
+    _lp = {
+        "stages": ["Контрактация",
+                   "Размещение заказа",
+                   "Изготовление",
+                   "Таможня",
+                   "Доставка",
+                   "Входной контроль",
+                   "Приемка",
+                   "Монтаж",
+                   "ПНР"],
+    }
+
+    def __init__(self, resource_group_id: uuid, stage: str):
+        super().__init__()
+        self.fd["resource_group_id"] = resource_group_id
+        self.fd["logistic_stage"] = stage
+        self.fd["stage_order"] = ResourceLogisticGuide._lp["stages"].index(stage)
+        self.fd["stage_duration"] = random.choice(range(0,100,10))
+        self.fd["stage_duration_scale"] = "Days"
+        self.fd["stage_conditions"] = "No special conditons"
+        self.fd["is_active"] = True
+
+    def __str__(self):
+        return f'group: {self.fd["resource_group_id"]} / {self.fd["logistic_stage"]} - {self.fd["stage_duration"]}'
+
+    @staticmethod
+    def generate(group_id_set: []) -> pd.DataFrame:
+        """
+        Generate fresh new set of logistic parameters fo each group item listed in [group_id_set].
+        :param group_id_set: set of unique local_id's of logistic group to be expanded with some parameters
+        :return: pandas.DataFrame filled with fresh new data
+        in accordance with data-schema as it can be loaded from production DB
+        """
+        max_params = len(ResourceLogisticGuide._lp["stages"])
+        assert max_params > 0, "Set of Stages is empty"
+
+        c = list()
+        for r_id in set(group_id_set):
+            # Do stages sampling
+            nst = random.randint(1, len(ResourceLogisticGuide._lp["stages"]) - 1)
+            for _, stg in enumerate(random.sample(ResourceLogisticGuide._lp["stages"], k=nst)):
+                p = ResourceLogisticGuide(resource_group_id=r_id, stage=stg)
+                c.append(p.get_data())
+
+        return pd.DataFrame(c)
+# end of ResourceLogisticGuide class
