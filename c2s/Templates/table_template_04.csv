@@ -1,0 +1,571 @@
+Item	Name	InUse	Type	primary_key	NotNull	Unique	Default	FK_Table	FK_Column	onCopy	Comment
+Table	BankEntity	FALSE		FALSE	FALSE	FALSE				FALSE	Данные юр. лица БАНК - резидент РФ
+	id	TRUE	serial	FALSE	TRUE	TRUE				FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локального кэша карточки банка-юридического лица.
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID карточки банка-юридического лица.
+	bic	TRUE	varchar(32)	FALSE	TRUE	TRUE				TRUE	БИК БАНКА
+	centralBankAffiliation	TRUE	varchar(255)	FALSE	FALSE	FALSE				TRUE	Принадлежность к филиалу ЦБ РФ
+	cbrfAccount	TRUE	varchar(32)	FALSE	FALSE	FALSE				TRUE	Номер корреспондентского счета в ЦБ РФ. Резидент - российское юр. лицо
+	cbrfLicense	TRUE	varchar(32)	FALSE	FALSE	FALSE				TRUE	Номер лицензии ЦБ РФ
+	cbrfRegistrationDate	TRUE	date	FALSE	FALSE	FALSE				TRUE	Дата регистрации. Формат  YYYY-MM-DD (ISO 8601)
+	ruLegalForm	TRUE	varchar(32)	FALSE	FALSE	FALSE				TRUE	Код организационно-правовой формы. [ОКОПФ](https://classifikators.ru/Okopf)
+	ruFullName	TRUE	varchar(1023)	FALSE	TRUE	FALSE				TRUE	Полное наименование юридического лица без указания формы собственности
+	ruShortName	TRUE	varchar(80)	FALSE	FALSE	FALSE				TRUE	Краткое наименование юридического лица без указания формы собственности
+	residence	TRUE	varchar(8)	FALSE	FALSE	FALSE	'RUS'			TRUE	Код страны налоговой принадлежности / резидентство - краткое наименование по справочнику [ОКСМ](https://classifikators.ru/oksm). Допускается только латиница, только трехбуквенный код (Alfa-3), прописные буквы.
+	inn	TRUE	varchar(32)	FALSE	FALSE	FALSE				TRUE	Unique Taxation Number (code) - индивидуальный номер налогоплательщика. Резидент - российское юр. лицо
+	cpp	TRUE	varchar(32)	FALSE	FALSE	FALSE				TRUE	Код причины постановки на учет (специфично для РФ). Как правило указывается в паре после указания ИНН
+	ogrn	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Общий государственный регистрационный номер юридического лица (для резидентов РФ)
+	city	TRUE	varchar(80)	FALSE	FALSE	FALSE				TRUE	Город (самостоятельная позиция, выделенная из полного адреса)
+	legalAddress	TRUE	varchar(255)	FALSE	TRUE	FALSE				TRUE	Адрес юр. лица в формате строки, валидной в контексте требований АСУХД ЕОГ
+	actualAddress	TRUE	varchar(255)	FALSE	FALSE	FALSE				TRUE	Адрес юр. лица в формате строки, валидной в контексте требований АСУХД ЕОГ
+	enFullName	TRUE	varchar(255)	FALSE	FALSE	FALSE				TRUE	(EN) Полное наименование банка на английском языке
+	swift_code	TRUE	varchar(32)	FALSE	FALSE	FALSE				TRUE	Уникальный SWIFT-код в системе международных межбанковских расчетов
+	OktmoIssues	TRUE	text[]	FALSE	FALSE	FALSE				TRUE	Код территории муниципального образования. До 01.01.2014 - ОКАТО [ОКТМО](https://classifikators.ru/Oktmo)
+	OkvedIssues	TRUE	text[]	FALSE	FALSE	FALSE				TRUE	Код вида экономической деятельности. По [ОКВЭД 2](https://classifikators.ru/Okved)
+	parentBic	TRUE	varchar(32)	FALSE	FALSE	FALSE				TRUE	БИК родительской банковской организации
+	ruRatingAgency	TRUE	varchar(255)	FALSE	FALSE	FALSE				TRUE	РФ - Рейтинговое агентство
+	ruRatingLevel	TRUE	varchar(32)	FALSE	FALSE	FALSE				TRUE	РФ - Текущий рейтинг
+	ruRatingUpdatedAt	TRUE	date	FALSE	FALSE	FALSE				TRUE	РФ - Дата обновления данных по рейтингу. Формат YYYY-MM-DD (ISO 8601)
+	intlRaitingAgency	TRUE	varchar(32)	FALSE	FALSE	FALSE				TRUE	International - Рейтинговое агентство
+	intlRaitingLevel	TRUE	varchar(255)	FALSE	FALSE	FALSE				TRUE	International - Текущий рейтинг
+	intlRatingUpdatedAt	TRUE	date	FALSE	FALSE	FALSE				TRUE	International - Дата обновления данных по рейтингу. Формат YYYY-MM-DD (ISO 8601)
+	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+	metaRowAllowed	TRUE	bool	FALSE	FALSE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table											
+Table	ContractorEntity	TRUE		FALSE	FALSE	FALSE				FALSE	Данные юр. лица КОМПАНИЯ - резидент РФ
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локального кэша карточки юридического лица.
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID карточки юридического лица.
+	ruLegalForm	TRUE	varchar(32)	FALSE	FALSE	FALSE				TRUE	Код организационно-правовой формы. [ОКОПФ](https://classifikators.ru/Okopf)
+	ruFullName	TRUE	varchar(1023)	FALSE	TRUE	FALSE				TRUE	Полное наименование юридического лица без указания формы собственности
+	ruShortName	TRUE	varchar(80)	FALSE	FALSE	FALSE				TRUE	Краткое наименование юридического лица без указания формы собственности
+	residence	TRUE	varchar(8)	FALSE	FALSE	FALSE	'RUS'			TRUE	Код страны налоговой принадлежности / резидентство - краткое наименование по справочнику [ОКСМ](https://classifikators.ru/oksm). Допускается только латиница, только трехбуквенный код (Alfa-3), прописные буквы.
+	inn	TRUE	varchar(32)	FALSE	FALSE	FALSE				TRUE	Unique Taxation Number (code) - индивидуальный номер налогоплательщика. Резидент - российское юр. лицо
+	cpp	TRUE	varchar(32)	FALSE	FALSE	FALSE				TRUE	Код причины постановки на учет (специфично для РФ). Как правило указывается в паре после указания ИНН
+	ogrn	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Общий государственный регистрационный номер юридического лица (для резидентов РФ)
+	city	TRUE	varchar(80)	FALSE	FALSE	FALSE				TRUE	Город (самостоятельная позиция, выделенная из полного адреса)
+	legalAddress	TRUE	varchar(255)	FALSE	FALSE	FALSE				TRUE	Адрес юр. лица в формате строки, валидной в контексте требований АСУХД ЕОГ
+	actualAddress	TRUE	varchar(255)	FALSE	FALSE	FALSE				TRUE	Адрес юр. лица в формате строки, валидной в контексте требований АСУХД ЕОГ
+	enFullName	TRUE	varchar(255)	FALSE	FALSE	FALSE				TRUE	(EN) Полное наименование компании на английском языке
+	OktmoIssues	TRUE	text[]	FALSE	FALSE	FALSE				TRUE	Код территории муниципального образования. До 01.01.2014 - ОКАТО [ОКТМО](https://classifikators.ru/Oktmo)
+	OkvedIssues	TRUE	text[]	FALSE	FALSE	FALSE				TRUE	Код вида экономической деятельности. По [ОКВЭД 2](https://classifikators.ru/Okved)
+	bankEntityId	TRUE	uuid	FALSE	FALSE	FALSE		BankEntity	localId	TRUE	Ссылка на банк, в котором открыт расчетный счет
+	rubAccountNumber	TRUE	varchar(32)	FALSE	FALSE	FALSE				TRUE	Номер расчетного счета (в рублях)
+	intlAccountNumber	TRUE	varchar(32)	FALSE	FALSE	FALSE				TRUE	Номер валютного расчетного счета
+	intlAccountCurrencyCode	TRUE	varchar(32)	FALSE	FALSE	FALSE				TRUE	Код валюты по валютному расчетному счету: трехбуквенный код в формате [ISO 4217](https://www.iban.ru/currency-codes). Допускается только латиница, только трехбуквенный код, прописные буквы.
+	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+#		FALSE		FALSE	FALSE	FALSE				FALSE	
+#	bic	FALSE	varchar(32)	FALSE	FALSE	FALSE				TRUE	БИК БАНКА
+#	centralBankAffiliation	FALSE	varchar(255)	FALSE	FALSE	FALSE				TRUE	Принадлежность к филиалу ЦБ РФ
+#	cbrfAccount	FALSE	varchar(32)	FALSE	FALSE	FALSE				TRUE	Номер корреспондентского счета в ЦБ РФ. Резидент - российское юр. лицо
+#	cbrfLicense	FALSE	varchar(32)	FALSE	FALSE	FALSE				TRUE	Номер лицензии ЦБ РФ
+#	cbrfRegistrationDate	FALSE	date	FALSE	FALSE	FALSE				TRUE	Дата регистрации. Формат  YYYY-MM-DD (ISO 8601)
+#	swift_code	FALSE	varchar(32)	FALSE	FALSE	FALSE				TRUE	Уникальный SWIFT-код в системе международных межбанковских расчетов
+#	parentBic	FALSE	varchar(32)	FALSE	FALSE	FALSE				TRUE	БИК родительской банковской организации
+#	ruRatingAgency	FALSE	varchar(255)	FALSE	FALSE	FALSE				TRUE	РФ - Рейтинговое агентство
+#	ruRatingLevel	FALSE	varchar(32)	FALSE	FALSE	FALSE				TRUE	РФ - Текущий рейтинг
+#	ruRatingUpdatedAt	FALSE	date	FALSE	FALSE	FALSE				TRUE	РФ - Дата обновления данных по рейтингу. Формат YYYY-MM-DD (ISO 8601)
+#	intlRaitingAgency	FALSE	varchar(32)	FALSE	FALSE	FALSE				TRUE	International - Рейтинговое агентство
+#	intlRaitingLevel	FALSE	varchar(255)	FALSE	FALSE	FALSE				TRUE	International - Текущий рейтинг
+#	intlRatingUpdatedAt	FALSE	date	FALSE	FALSE	FALSE				TRUE	International - Дата обновления данных по рейтингу. Формат YYYY-MM-DD (ISO 8601)
+--- end of table		FALSE		FALSE	FALSE	FALSE				TRUE	
+Table	PersonalityEntity	TRUE		FALSE	FALSE	FALSE				FALSE	Данные физ. лица - резидент РФ (без привязки к какой-либо компании)
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локального кэша карточки физического лица.
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID карточки физического лица
+	lastName	TRUE	varchar(80)	FALSE	TRUE	FALSE				TRUE	Фамилия / Required
+	firstName	TRUE	varchar(80)	FALSE	FALSE	FALSE				TRUE	Имя / Required
+	secondName	TRUE	varchar(80)	FALSE	FALSE	FALSE				TRUE	Отчество
+	gender	TRUE	varchar(8)	FALSE	FALSE	FALSE	'муж.'			TRUE	Пол [муж., жен.]
+	birthDate	TRUE	date	FALSE	FALSE	FALSE				TRUE	Дата рождения
+	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table		FALSE		FALSE	FALSE	FALSE				TRUE	
+Table	ContractorPersonnel	TRUE		FALSE	FALSE	FALSE				FALSE	Данные физ. лица - резидент РФ ( м.б. сотрудником / представителем юр.лица произвольного типа)
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локального кэша карточки физического лица.
+	contractorId	TRUE	uuid	FALSE	FALSE	FALSE		ContractorEntity	localId	TRUE	Ссылка на компанию, в которой работает сотрудник
+	personnelId	TRUE	uuid	FALSE	FALSE	FALSE		PersonalityEntity	localId	TRUE	Ссылка на справочник физических лиц
+	contacts	TRUE	varchar(255)	FALSE	FALSE	FALSE				TRUE	TODO: раскрыть в модели схему указания контактов, в т.с. с выделением наиболее актуального способа связи
+	hireDate	TRUE	date	FALSE	FALSE	FALSE				TRUE	Дата появления (найма, приема на работу). Формат YYYY-MM-DD (ISO 8601). Если указано, использование данные такой записи в операциях с датой ДО указанной, запрещено
+	fireDate	TRUE	date	FALSE	FALSE	FALSE				TRUE	Дата увольнения. Формат YYYY-MM-DD (ISO 8601). Если указано, использование данные такой записи в операциях с датой ПОСЛЕ указанной, запрещено
+	validTo	TRUE	date	FALSE	FALSE	FALSE				TRUE	Дата прекращения полномочий (из внешнего источника). Формат YYYY-MM-DD (ISO 8601). NULL - срок валидности не установлен. Полномочия валидны с учетом значения hireDate.
+	positions	TRUE	varchar(255)	FALSE	FALSE	FALSE				TRUE	Список должностей / полномочий. Допускается пустой список. В тестовой реализации допускается только один элемент.
+	canSign	TRUE	text[]	FALSE	FALSE	FALSE				TRUE	Массив с перечнем документов, которые может подписывать данный сотрудник
+	items	FALSE		FALSE	FALSE	FALSE				TRUE	Элементы список должностей / ролей. Допускается пустой список. В тестовой реализации не используется.
+	positionName	TRUE	varchar(255)	FALSE	FALSE	FALSE				TRUE	Наименование позиции / должности
+	confirmationDocument	TRUE	varchar(255)	FALSE	FALSE	FALSE				TRUE	Наименование и другие реквизиты подтверждающего документа - в свободной форме
+	expirationDate	TRUE	date	FALSE	FALSE	FALSE				TRUE	Срок действия подтверждающего документа.  Формат YYYY-MM-DD (ISO 8601)
+--- end of table		FALSE		FALSE	FALSE	FALSE				TRUE	
+Table	ldProjectTypes	TRUE		FALSE	FALSE	FALSE				FALSE	Локальный справочник - типы проектов
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локальной записи справочника.
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID записи справочника.
+	dictTypeName	TRUE	varchar(32)	FALSE	TRUE	FALSE	'Project Type'			FALSE	Константа - идентификатор справочника / словаря. Не используется при загрузке / вставке / обновлении
+	dictStringValue	TRUE	varchar(255)	FALSE	FALSE	TRUE				TRUE	Строковое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	dictMoneyValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Значение типа Money записи справочника (UNIQUE or NULL в пределах справочника)
+	dictNumberValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Числовое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	isActive	TRUE	bool	FALSE	FALSE	FALSE				TRUE	Локальный статус активности любого из используемых значений. True - значение может использовться для новых записей.
+#	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+#	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+#	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+#	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+#	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+#	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+#	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table		FALSE		FALSE	FALSE	FALSE				TRUE	
+Table	ldProjectStatuses	TRUE		FALSE	FALSE	FALSE				FALSE	Локальный справочник - статусы проектов
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локальной записи справочника.
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID записи справочника.
+	dictTypeName	TRUE	varchar(32)	FALSE	TRUE	FALSE	'Project Status'			FALSE	Константа - идентификатор справочника / словаря. Не используется при загрузке / вставке / обновлении
+	dictStringValue	TRUE	varchar(255)	FALSE	FALSE	TRUE				TRUE	Строковое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	dictMoneyValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Значение типа Money записи справочника (UNIQUE or NULL в пределах справочника)
+	dictNumberValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Числовое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	isActive	TRUE	bool	FALSE	FALSE	FALSE				TRUE	Локальный статус активности любого из используемых значений. True - значение может использовться для новых записей.
+#	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+#	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+#	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+#	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+#	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+#	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+#	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table		FALSE		FALSE	FALSE	FALSE				FALSE	
+Table	ldProjectPartyTypes	TRUE		FALSE	FALSE	FALSE				FALSE	Локальный справочник - Тип "участника проекта строительства"
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локальной записи справочника.
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID записи справочника.
+	dictTypeName	TRUE	varchar(32)	FALSE	TRUE	FALSE	'Project Party'			FALSE	Константа - идентификатор справочника / словаря. Не используется при загрузке / вставке / обновлении
+	dictStringValue	TRUE	varchar(255)	FALSE	FALSE	TRUE				TRUE	Строковое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	dictMoneyValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Значение типа Money записи справочника (UNIQUE or NULL в пределах справочника)
+	dictNumberValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Числовое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	isActive	TRUE	bool	FALSE	FALSE	FALSE				TRUE	Локальный статус активности любого из используемых значений. True - значение может использовться для новых записей.
+#	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+#	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+#	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+#	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+#	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+#	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+#	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table		FALSE		FALSE	FALSE	FALSE				FALSE	
+Table	ProjectEntity	TRUE		FALSE	FALSE	FALSE				FALSE	Данные (карточка) проекта
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локального кэша проекта.
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID проекта (карточки)
+	externalCode	TRUE	varchar(255)	FALSE	FALSE	FALSE				TRUE	Внешний код проекта строительства, если указан. Значение не контролируется на уровне бизнес-логики и принимается "as is"
+	projectName	TRUE	varchar(255)	FALSE	FALSE	FALSE				TRUE	Наименование проекта строительства
+	projectDescription	TRUE	varchar(1023)	FALSE	FALSE	FALSE				TRUE	Описание проекта строительства в свободной форме
+	projectType	TRUE	uuid	FALSE	FALSE	FALSE		ldProjectTypes	localId	TRUE	Ссылка на  локальный справочник типов проектов
+	projectStatus	TRUE	uuid	FALSE	FALSE	FALSE		ldProjectStatuses	localId	TRUE	Ссылка на  локальный справочник статусов проектов
+	projectStart	TRUE	date	FALSE	FALSE	FALSE				TRUE	Дата начала проекта (по плану). Формат YYYY-MM-DD (ISO 8601)
+	projectFinish	TRUE	date	FALSE	FALSE	FALSE				TRUE	Дата начала проекта (по плану). Формат YYYY-MM-DD (ISO 8601)
+	projectStartedAt	TRUE	date	FALSE	FALSE	FALSE				TRUE	Дата начала проекта (фактическая). Формат YYYY-MM-DD (ISO 8601)
+#	projectSites	FALSE		FALSE	FALSE	FALSE				TRUE	Список объектов строительства в проекте
+#	items	FALSE		FALSE	FALSE	FALSE				TRUE	
+#	subSite	FALSE		FALSE	FALSE	FALSE				TRUE	
+#	projectContracts	FALSE		FALSE	FALSE	FALSE				TRUE	Сведения о контрактах по проекту
+#	items	FALSE		FALSE	FALSE	FALSE				TRUE	
+#	contractType	FALSE		FALSE	FALSE	FALSE				TRUE	Тип контракта. Для УСД имеют значение только контракты типа 'Construction'
+#	contractItem	FALSE		FALSE	FALSE	FALSE				TRUE	
+#	projectParties	FALSE		FALSE	FALSE	FALSE				TRUE	Сведения о юридических лицах - участниках проекта
+#	items	FALSE		FALSE	FALSE	FALSE				TRUE	
+#	projectPartyType	FALSE		FALSE	FALSE	FALSE				TRUE	Тип "стороны/участника" по проекту
+#	projectPartyName	FALSE		FALSE	FALSE	FALSE				TRUE	Обозначение типа участника, если projectPartyType = Other
+#	projectPaty	FALSE		FALSE	FALSE	FALSE				TRUE	
+#	relatedDocs	FALSE		FALSE	FALSE	FALSE				TRUE	Сведения о документах по проекту в целом
+#	items	FALSE		FALSE	FALSE	FALSE				TRUE	
+#	documentName	FALSE		FALSE	FALSE	FALSE				TRUE	
+#	documentReference	FALSE		FALSE	FALSE	FALSE				TRUE	
+	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table		FALSE		FALSE	FALSE	FALSE				TRUE	
+Table	ProjectParties	TRUE		FALSE	FALSE	FALSE				FALSE	Расширение карточки проекта - "участники" проекта строительства
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	Id локального справочника
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	
+	projectId	TRUE	uuid	FALSE	TRUE	FALSE		ProjectEntity	localId	TRUE	Локальный Id проекта
+	contractorId	TRUE	uuid	FALSE	TRUE	FALSE		ContractorEntity	localId	TRUE	Локальный Id юр. лица - участника проекта
+	partyType	TRUE	uuid	FALSE	TRUE	FALSE		ldProjectPartyTypes	localId	TRUE	Тип участника / участия по справочнику типов участников строительства
+	roleDescription	TRUE	varchar(1023)	FALSE	FALSE	FALSE				TRUE	Описание роли участника в проекте в свободной форме
+	activatedAt	TRUE	date	FALSE	TRUE	FALSE				TRUE	Дата активации (до этой даты статус положительный is_active должен игнорироваться)
+	suspendedAt	TRUE	date	FALSE	FALSE	FALSE				TRUE	Дата приостановки активности участника (после этой даты статус положительный is_active должен игнорироваться)
+	resumedAt	TRUE	date	FALSE	FALSE	FALSE				TRUE	Дата восстановления активности участника (после этой даты статус положительный is_active должен учитываться в обычном порядке)
+	isActive	TRUE	bool	FALSE	FALSE	FALSE				TRUE	Текущий статус активности (TRUE - данные участника разрешено использовать в текущих бизнес-процессах системы
+	terminatedAt	TRUE	date	FALSE	FALSE	FALSE				FALSE	Дата прекращения активности участника (после этой даты статус положительный is_active должен игнорироваться)
+#	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+#	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+#	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+#	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+#	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+#	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+#	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table		FALSE		FALSE	FALSE	FALSE				TRUE	
+#Table	ConstructionEntity	TRUE		FALSE	FALSE	FALSE				FALSE	Данные (карточка) единичного (неделимого в учете) объекта строительства
+#	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+#	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локального кэша (под)объекта строительства.
+#	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID карточки (под)объекта строительства.
+#	externalCode	TRUE	varchar(255)	FALSE	FALSE	FALSE				TRUE	Внешний код (под)объекта строительства, если указан. Значение не контролируется на уровне бизнес-логики и принимается "as is"
+#	entityDescription	TRUE	varchar(1023)	FALSE	FALSE	FALSE				TRUE	Описание под(объекта) строительства.
+#	entityGeography	FALSE		FALSE	FALSE	FALSE				FALSE	Точка географической привязки объекта строительства (для отображения на карте)
+#	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+#	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+#	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+#	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+#	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+#	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+#	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+#	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+#	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+#--- end of table		FALSE		FALSE	FALSE	FALSE				FALSE	
+Table	ConstructionSites	FALSE		FALSE	FALSE	FALSE				FALSE	Данные (иерархический список) объектов строительства, которые входят в строительный проект
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локального кэша объекта строительства.
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID карточки объекта строительства.
+	externalCode	TRUE	varchar(255)	FALSE	FALSE	FALSE				TRUE	Внешний код (под)объекта строительства, если указан. Значение не контролируется на уровне бизнес-логики и принимается "as is"
+	entityDescription	TRUE	varchar(1023)	FALSE	FALSE	FALSE				TRUE	Описание под(объекта) строительства.
+#	entityGeography	FALSE		FALSE	FALSE	FALSE				FALSE	Точка географической привязки объекта строительства (для отображения на карте)
+	projectEntityId	TRUE	uuid	FALSE	FALSE	FALSE		ProjectEntity	localId	TRUE	Ссылка на проект, в котором выполняется строительство данного объекта.
+	isPrimary	TRUE	bool	FALSE	FALSE	FALSE	FALSE			TRUE	Является первичным (главным) объектом строительства. Один ContructionSite может содержать только один первичный объект строительства
+	primaryConstructionId	TRUE	uuid	FALSE	FALSE	FALSE		ConstructionSites	localId	TRUE	Ссылка на описание (под)объекта строительства.
+#	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+#	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+#	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+#	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+#	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+#	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+#	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table		FALSE		FALSE	FALSE	FALSE				FALSE	
+Table	ldContractTypes	TRUE		FALSE	FALSE	FALSE				FALSE	Локальный справочник - типы  договоров (контрактов)
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локальной записи справочника.
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID записи справочника.
+	dictTypeName	TRUE	varchar(32)	FALSE	TRUE	FALSE	'Contract Type'			FALSE	Константа - идентификатор справочника / словаря. Не используется при загрузке / вставке / обновлении
+	dictStringValue	TRUE	varchar(255)	FALSE	FALSE	TRUE				TRUE	Строковое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	dictMoneyValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Значение типа Money записи справочника (UNIQUE or NULL в пределах справочника)
+	dictNumberValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Числовое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	isActive	TRUE	bool	FALSE	FALSE	FALSE				TRUE	Локальный статус активности любого из используемых значений. True - значение может использовться для новых записей.
+#	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+#	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+#	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+#	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+#	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+#	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+#	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table		FALSE		FALSE	FALSE	FALSE				TRUE	
+Table	ldContractStatuses	TRUE		FALSE	FALSE	FALSE				FALSE	Локальный справочник - статусы договоров (контрактов)
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локальной записи справочника.
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID записи справочника.
+	dictTypeName	TRUE	varchar(32)	FALSE	TRUE	FALSE	'Contract Status'			FALSE	Константа - идентификатор справочника / словаря. Не используется при загрузке / вставке / обновлении
+	dictStringValue	TRUE	varchar(255)	FALSE	FALSE	TRUE				TRUE	Строковое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	dictMoneyValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Значение типа Money записи справочника (UNIQUE or NULL в пределах справочника)
+	dictNumberValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Числовое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	isActive	TRUE	bool	FALSE	FALSE	FALSE				TRUE	Локальный статус активности любого из используемых значений. True - значение может использовться для новых записей.
+#	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+#	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+#	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+#	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+#	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+#	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+#	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table		FALSE		FALSE	FALSE	FALSE				FALSE	
+Table	ldContractPartyTypes	TRUE		FALSE	FALSE	FALSE				FALSE	Локальный справочник - типы участников строительства (сторон по контракту)
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локальной записи справочника.
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID записи справочника.
+	dictTypeName	TRUE	varchar(32)	FALSE	TRUE	FALSE	'Contract  Party'			FALSE	Константа - идентификатор справочника / словаря. Не используется при загрузке / вставке / обновлении
+	dictStringValue	TRUE	varchar(255)	FALSE	FALSE	TRUE				TRUE	Строковое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	dictMoneyValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Значение типа Money записи справочника (UNIQUE or NULL в пределах справочника)
+	dictNumberValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Числовое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	isActive	TRUE	bool	FALSE	FALSE	FALSE				TRUE	Локальный статус активности любого из используемых значений. True - значение может использовться для новых записей.
+#	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+#	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+#	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+#	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+#	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+#	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+#	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table		FALSE		FALSE	FALSE	FALSE				FALSE	
+Table	ContractEntity	TRUE		FALSE	FALSE	FALSE				FALSE	Справочник (карточка) контракта (договора)
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локального кэша контракта.
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID договора (карточки)
+	projectId	TRUE	uuid	FALSE	FALSE	FALSE		ProjectEntity	localId	TRUE	Опционально: ссылка на проект
+	contractNumber	TRUE	varchar(50)	FALSE	TRUE	FALSE				TRUE	Номер договора
+	contractDate	TRUE	date	FALSE	TRUE	FALSE				TRUE	Дата подписания договора Формат YYYY-MM-DD (ISO 8601)
+	contractSubject	TRUE	varchar(1023)	FALSE	TRUE	FALSE				TRUE	Описание предмета контракта / договора в свободной форме
+#	contractBidValue	TRUE	decimal(15,4)	FALSE	FALSE	FALSE				TRUE	Начальная максимальная цена контракта (договора, НМЦК) с учетом всех входящих налогов и обязательных платежей
+#	contractSignedValue	TRUE	decimal(15,4)	FALSE	FALSE	FALSE				TRUE	Цена (стоимость) контракта в момент заключения с учетом всех входящих налогов и обязательных платежей
+	contractValue	TRUE	decimal(15,4)	FALSE	TRUE	FALSE				TRUE	Общая стоимость по договору с учетом всех входящих налогов и обязательных платежей
+	contractStatus	TRUE	uuid	FALSE	FALSE	FALSE		ldContractStatuses	localId	TRUE	Текущий статус контракта - ссылка на справочник ldContractStatuses
+	statusChangedAt	TRUE	date	FALSE	FALSE	FALSE				TRUE	Дата последнего (по времени) изменения статуса контракта
+	contractType	TRUE	uuid	FALSE	TRUE	FALSE		ldContractTypes	localId	TRUE	Тип контракта - ссылка на справочник ldContractTypes
+	contractSignedDate	TRUE	date	FALSE	FALSE	FALSE				TRUE	Дата подписания контракта
+	dateStart	TRUE	date	FALSE	FALSE	FALSE				TRUE	Плановая дата начала работ по контракту
+	dateFinish	TRUE	date	FALSE	FALSE	FALSE				TRUE	Плановая дата завершения работ по контракту
+	baseContractId	TRUE	uuid	FALSE	FALSE	FALSE		ContractEntity	localId	TRUE	Ссылка на базовый контракт. Если указано, то данный контракт является доп. соглашением к базовому контракту
+	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table		FALSE		FALSE	FALSE	FALSE				FALSE	
+Table	ContractParties	TRUE		FALSE	FALSE	FALSE				FALSE	Справочник "участники" договора (контракта)
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	Id локального справочника
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	
+	contractId	TRUE	uuid	FALSE	TRUE	FALSE		ContractEntity	localId	TRUE	Локальный Id договора
+	contratorId	TRUE	uuid	FALSE	TRUE	FALSE		ContractorEntity	localId	TRUE	Локальный Id юр. лица - стороны по договору
+	isCustomer	TRUE	bool	FALSE	TRUE	FALSE	FALSE			TRUE	Если TRUE, то данная запись указывает на "Заказчика по договору". Не может конфликтовать со значением partyType
+	partyType	TRUE	uuid	FALSE	TRUE	FALSE		ldContractPartyTypes	localId	TRUE	Тип участника / участия по справочнику типов сторон по договору
+	roleDescription	TRUE	varchar(1023)	FALSE	FALSE	FALSE				TRUE	Описание роли стороны по договору в свободной форме
+	activatedAt	TRUE	date	FALSE	TRUE	FALSE				TRUE	Дата активации (до этой даты статус положительный is_active должен игнорироваться)
+	suspendedAt	TRUE	date	FALSE	FALSE	FALSE				TRUE	Дата приостановки активности участника (после этой даты статус положительный is_active должен игнорироваться)
+	resumedAt	TRUE	date	FALSE	FALSE	FALSE				TRUE	Дата восстановления активности участника (после этой даты статус положительный is_active должен учитываться в обычном порядке)
+	isActive	TRUE	bool	FALSE	FALSE	FALSE				TRUE	Текущий статус активности (TRUE - данные участника разрешено использовать в текущих бизнес-процессах системы
+	terminatedAt	TRUE	date	FALSE	FALSE	FALSE				FALSE	Дата прекращения активности участника (после этой даты статус положительный is_active должен игнорироваться)
+#	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+#	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+#	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+#	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+#	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+#	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+#	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table		FALSE		FALSE	FALSE	FALSE				TRUE	
+Table	ldControlCheckTypes	TRUE		FALSE	FALSE	FALSE				FALSE	Локальный справочник - виды проверок СК
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локальной записи справочника.
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID записи справочника.
+	dictTypeName	TRUE	varchar(32)	FALSE	TRUE	FALSE	'Control Check'			FALSE	Константа - идентификатор справочника / словаря. Не используется при загрузке / вставке / обновлении
+	dictStringValue	TRUE	varchar(255)	FALSE	FALSE	TRUE				TRUE	Строковое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	dictMoneyValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Значение типа Money записи справочника (UNIQUE or NULL в пределах справочника)
+	dictNumberValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Числовое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	isActive	TRUE	bool	FALSE	FALSE	FALSE				TRUE	Локальный статус активности любого из используемых значений. True - значение может использовться для новых записей.
+#	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+#	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+#	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+#	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+#	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+#	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+#	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table		FALSE		FALSE	FALSE	FALSE				FALSE	
+Table	ldControlViolationTypes	TRUE		FALSE	FALSE	FALSE				FALSE	Локальный справочник - виды нарушений проверок СК
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локальной записи справочника.
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID записи справочника.
+	dictTypeName	TRUE	varchar(32)	FALSE	TRUE	FALSE	'Control Violation'			FALSE	Константа - идентификатор справочника / словаря. Не используется при загрузке / вставке / обновлении
+	dictStringValue	TRUE	varchar(255)	FALSE	FALSE	TRUE				TRUE	Строковое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	dictMoneyValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Значение типа Money записи справочника (UNIQUE or NULL в пределах справочника)
+	dictNumberValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Числовое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	isActive	TRUE	bool	FALSE	FALSE	FALSE				TRUE	Локальный статус активности любого из используемых значений. True - значение может использовться для новых записей.
+#	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+#	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+#	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+#	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+#	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+#	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+#	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table		FALSE		FALSE	FALSE	FALSE				FALSE	
+Table	ldExecutiveDocTypes	TRUE		FALSE	FALSE	FALSE				FALSE	Локальный справочник - виды исполнительной документации
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локальной записи справочника.
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID записи справочника.
+	dictTypeName	TRUE	varchar(32)	FALSE	TRUE	FALSE	'Executive Document'			FALSE	Константа - идентификатор справочника / словаря. Не используется при загрузке / вставке / обновлении
+	dictStringValue	TRUE	varchar(255)	FALSE	FALSE	TRUE				TRUE	Строковое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	dictMoneyValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Значение типа Money записи справочника (UNIQUE or NULL в пределах справочника)
+	dictNumberValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Числовое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	isActive	TRUE	bool	FALSE	FALSE	FALSE				TRUE	Локальный статус активности любого из используемых значений. True - значение может использовться для новых записей.
+#	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+#	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+#	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+#	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+#	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+#	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+#	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table		FALSE		FALSE	FALSE	FALSE				FALSE	
+Table	ldPermissiveDocTypes	TRUE		FALSE	FALSE	FALSE				FALSE	Локальный справочник - виды разрешительной документации
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локальной записи справочника.
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID записи справочника.
+	dictTypeName	TRUE	varchar(32)	FALSE	TRUE	FALSE	'Permissive Document'			FALSE	Константа - идентификатор справочника / словаря. Не используется при загрузке / вставке / обновлении
+	dictStringValue	TRUE	varchar(255)	FALSE	FALSE	TRUE				TRUE	Строковое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	dictMoneyValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Значение типа Money записи справочника (UNIQUE or NULL в пределах справочника)
+	dictNumberValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Числовое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	isActive	TRUE	bool	FALSE	FALSE	FALSE				TRUE	Локальный статус активности любого из используемых значений. True - значение может использовться для новых записей.
+#	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+#	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+#	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+#	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+#	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+#	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+#	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table		FALSE		FALSE	FALSE	FALSE				FALSE	
+Table	ldMeasureUnitGuide	TRUE		FALSE	FALSE	FALSE				FALSE	Локальный справочник - единицы измерения (проекция ОКЕИ)
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локальной записи справочника.
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID записи справочника.
+	mu_locale	TRUE	varchar(32)	FALSE	TRUE	FALSE				TRUE	Локаль представления единицы измерения
+	mu_local_type	TRUE	varchar(32)	FALSE	FALSE	FALSE				TRUE	Локальный (обобщающий) тип или группа единицы измерения
+	mu_intl_type	TRUE	varchar(32)	FALSE	FALSE	FALSE				TRUE	Международный (обобщающий) тип или группа единицы измерения
+	type_seq_number	TRUE	int	FALSE	FALSE	FALSE				TRUE	Последовательный номер единицы измерения в пределах типа / группы
+	mu_digital_code	TRUE	varchar(32)	FALSE	TRUE	TRUE				TRUE	Цифровой код единицы измерения (международное представление)
+	mu_full_name	TRUE	varchar(80)	FALSE	TRUE	FALSE				TRUE	Полное наименование единицы измерения в данной локали
+	mu_local_legend	TRUE	text[]	FALSE	FALSE	FALSE				TRUE	Список допустимых кратких наименований единицы измерения в данной локали
+	mu_intl_legend	TRUE	text[]	FALSE	FALSE	FALSE				TRUE	Список допустимых кратких наименований единицы измерения в международном представлении (если есть)
+	mu_used_name	TRUE	varchar(8)	FALSE	TRUE	TRUE				TRUE	Краткое наименование единицы измерения, допустимый к использованию в системе (одно выбранное значение из mu_local_legend)
+	isActive	TRUE	bool	FALSE	FALSE	FALSE				TRUE	Локальный статус активности любого из используемых значений. True - значение может использовться для новых записей.
+#	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+#	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+#	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+#	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+#	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+#	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+#	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table		FALSE		FALSE	FALSE	FALSE				FALSE	
+Table	ldResourceGroupGuide	TRUE		FALSE	FALSE	FALSE				FALSE	Локальный справочник - группы МТР
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локальной записи справочника.
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID записи справочника.
+	resourceGroupCode	TRUE	varchar(8)	FALSE	TRUE	TRUE				TRUE	Уникальный код группы МТР (строковое представление)
+	resourceGroupName	TRUE	varchar(80)	FALSE	TRUE	TRUE				TRUE	Уникальное наименование группы МТР
+	resourceMuName	TRUE	varchar(8)	FALSE	TRUE	FALSE		ldMeasureUnitGuide	mu_used_name	TRUE	Допустимая единица измерения по позициям данной группы МТР - ссылка на ldMeasureUnitGuide
+	resourceMuCode	TRUE	varchar(8)	FALSE	FALSE	FALSE		ldMeasureUnitGuide	mu_digital_code	TRUE	Цифровой код единицы измерения - ссылка на ldMeasureUnitGuide
+	resourceDescription	TRUE	varchar(255)	FALSE	FALSE	FALSE				TRUE	Описание позиций группы МТР в свободной форме
+	resourceRepresentation	TRUE	varchar(1023)	FALSE	FALSE	FALSE				TRUE	Шаблон представления данных о позициях группы МТР в нормализованной форме
+	isActive	TRUE	bool	FALSE	FALSE	FALSE				TRUE	Локальный статус активности любого из используемых значений. True - значение может использовться для новых записей.
+#	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+#	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+#	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+#	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+#	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+#	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+#	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table		FALSE		FALSE	FALSE	FALSE				FALSE	
+Table	ldResourceLogisticsGuide	TRUE		FALSE	FALSE	FALSE				FALSE	Локальный справочник - логистические параметры групп МТР (этапы и время выполнения каждого этапа логистической обработки по позициям данной группы)
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локальной записи справочника.
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID записи справочника.
+	resourceGroupId	TRUE	uuid	FALSE	TRUE	FALSE		ldResourceGroupGuide	localId	TRUE	Ссылка на запись справочника групп МТР
+	logisticsStage	TRUE	varchar(255)	FALSE	TRUE	FALSE				TRUE	Наименование стадии логистики
+	stageOrder	TRUE	int	FALSE	TRUE	FALSE	0			TRUE	Порядковый номер стадии логистики в общем процессе логистической обработки. Если две или более стадий имеют одинаковое значение stageOrder, то при формировании графика комплектации соотв. значения будут учитываться в  произвольно порядке в пределах stageOrder.
+	stageDuration	TRUE	int	FALSE	TRUE	FALSE	0			TRUE	Длительность стадии логистики в выбранном масштабе. Всегда указывается абсолютное значение (длительность именно данного этапа обработки). Целое число, больше и равное нулю.
+	stageDurationScale	TRUE	varchar(8)	FALSE	TRUE	FALSE	'DAY'			TRUE	Масштаб оценки длительности стадии логистики. По умолчанию - День (DAY)
+	stageConditions	TRUE	varchar(255)	FALSE	FALSE	FALSE				TRUE	В свободной форме - специальные условия для данной стадии логистической обработки (если установлены)
+	isActive	TRUE	bool	FALSE	FALSE	FALSE				TRUE	Локальный статус активности любого из используемых значений. True - значение может использовться для новых записей.
+#	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+#	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+#	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+#	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+#	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+#	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+#	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table		FALSE		FALSE	FALSE	FALSE				FALSE	
+Table	ldLocalDocContexts	TRUE		FALSE	FALSE	FALSE				FALSE	Локальный справочник - локальные типы контекстов документов, т.е. указание на бизнес-процесс, в котором данный документ был создан и/или загружен
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локальной записи справочника.
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID записи справочника.
+	dictTypeName	TRUE	varchar(32)	FALSE	TRUE	FALSE	'Document Business Context'			FALSE	Константа - идентификатор справочника / словаря. Не используется при загрузке / вставке / обновлении
+	dictStringValue	TRUE	varchar(255)	FALSE	FALSE	TRUE				TRUE	Строковое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	dictMoneyValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Значение типа Money записи справочника (UNIQUE or NULL в пределах справочника)
+	dictNumberValue	TRUE	decimal(15,4)	FALSE	FALSE	TRUE				TRUE	Числовое значение записи справочника (UNIQUE or NULL в пределах справочника)
+	isActive	TRUE	bool	FALSE	FALSE	FALSE				TRUE	Локальный статус активности любого из используемых значений. True - значение может использовться для новых записей.
+#	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+#	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+#	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+#	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+#	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+#	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+#	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table		FALSE		FALSE	FALSE	FALSE				FALSE	
+Table	DocumentBase	TRUE		FALSE	FALSE	FALSE				FALSE	Для проработки: базовый атрибутивный набор представления документа
+	id	TRUE	serial	FALSE	TRUE	TRUE	 			FALSE	Локальный порядковый Id. PK / Индексом не является. Не может использоваться в качестве пары в PK/FK Relation
+	localId	TRUE	uuid	TRUE	TRUE	TRUE	gen_random_uuid()			TRUE	ID локально сохраненной записи о документе.
+	entityId	TRUE	uuid	FALSE	FALSE	FALSE				FALSE	Глобальный ID записи о документе.
+	localDocumentContext	TRUE	uuid	FALSE	FALSE	FALSE		ldLocalDocContexts	localId	TRUE	Ссылка на допустимый контекст создания / загрузки документа в соответствии с ldLocalDocContexts
+	documentDescription	TRUE	varchar(1023)	FALSE	FALSE	FALSE				TRUE	Описание документа в свободной форме
+	documentUri	TRUE	varchar(1023)	FALSE	FALSE	FALSE				TRUE	Постоянный адрес хранения. Может быть пустым, если документ еще не загружен хранилище АСУХД.
+	documentSourceId	TRUE	uuid	FALSE	FALSE	FALSE				TRUE	Локальный ID документа в (под)системе-источнике (т.е. в подсистеме, в которой данный документ был загружен)
+	documentSource	TRUE	varchar(255)	FALSE	FALSE	FALSE				TRUE	Наименование (под)системы, в контексте которой работал пользователь, загрузивший документ.
+	sourceVersion	TRUE	int	FALSE	FALSE	FALSE				TRUE	Номер версии (обновления) в (под)системе - источнике.
+	mimeType	TRUE	varchar(80)	FALSE	FALSE	FALSE				TRUE	mime Type в соответствии с [RFC-6838](https://www.iana.org/assignments/media-types/media-types.xhtml)
+	contentLength	TRUE	int	FALSE	FALSE	FALSE				TRUE	Размер (длина) контента документа в байтах
+	baseName	TRUE	varchar(1023)	FALSE	FALSE	FALSE				TRUE	Исходное (оригинальное) имя загруженного файла
+	loadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	дата первичной загрузки данных документа. Формат YYYY-MM-DD (ISO 8601)
+	loadedBy	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	идентификатор пользователя, выполнившего первичную загрузку
+ 	metaSourceName	TRUE	varchar(50)	FALSE	FALSE	FALSE				TRUE	Meta - Наименование внешнего источника
+ 	metaSourceTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения во внешнем источнике
+ 	metaSourceRowLoadedAt	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Дата/время первичной загрузки данных из внешнего источника. Формат YYYY-MM-DD (ISO 8601)
+ 	metaSourceRowVersion	TRUE	bigint	FALSE	FALSE	FALSE				TRUE	Meta - Номер версии во внешнем источнике
+ 	metaLocalTimeStamp	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Timestamp последнего изменения в данной таблице
+ 	metaRowAllowed	TRUE	bool	FALSE	TRUE	FALSE				TRUE	Meta - Признак активности данных в текущей строке (TRUE - строка активна)
+ 	metaRowValidTo	TRUE	timestamp	FALSE	FALSE	FALSE				TRUE	Meta - Предельный срок валидности данных в текущей строке. Формат YYYY-MM-DDTHH:MM:SS (ISO 8601). NULL - срок валидности не установлен. Данные валидны без ограничения по сроку.
+	updatedAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата последнего обновления. Формат YYYY-MM-DD (ISO 8601)
+	createdAt	TRUE	timestamp	FALSE	TRUE	FALSE	now()			FALSE	Дата создания записи в локальном справочнике (кеше). Формат YYYY-MM-DDTHH:MM:SS (ISO 8601).
+--- end of table		FALSE		FALSE	FALSE	FALSE				FALSE	

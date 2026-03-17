@@ -1,8 +1,8 @@
 import datetime
 
 
-# integration_issue
-class integration_issue:
+# IntegrationIssue
+class IntegrationIssue:
     def __init__(self):
         self.fd = dict()
         self.fd["meta_source_name"] = "avs@ipm"
@@ -25,12 +25,12 @@ class integration_issue:
     def __str__(self):
         return (
             f'{self.fd["meta_source_name"]}: version: {self.fd["meta_source_row_version"]} / loaded at: {self.fd["meta_source_row_loaded_at"]}')
-# end of integration_issue class
+# end of IntegrationIssue class
 
 
 def _check_ii() -> None:
     # CHECK - Inherited from Jupiter notebook
-    ii = integration_issue()
+    ii = IntegrationIssue()
     print(ii)
     print(ii.get_headers())
     print(ii.get_csv())

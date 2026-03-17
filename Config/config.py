@@ -21,7 +21,7 @@ DB_Default = "test"               # Default database (schema - public)
 C2S_ns_prefix = "ch"              # DDL/DML table names prefix. An empty prefix is possible.
 # About templates
 C2S_templates_path = r"./c2s/Templates"
-C2S_template_file = r"table_template_01.csv"
+C2S_template_file = r"table_template_05.csv"
 # About results
 C2S_upload_path = os.path.join(r"C:/Users/Public/PGData/", DB_Default, C2S_ns_prefix)
 C2S_upload_sql_path = os.path.join(C2S_upload_path, "sql")     # SQL Loaders will be placed here

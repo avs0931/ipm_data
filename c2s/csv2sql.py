@@ -192,6 +192,7 @@ if __name__ == '__main__':
 
     # 2025-04-07
     # Remove NOT NULL constraints from activated_at for tables [project_parties] and [contract_parties]
+    # TODO: transfer to config!
     template_in: str = r"table_template_05.csv"
 
     template_out: str = "_".join([config_ns_prefix, r"templates.sql"]).strip("_").lower()

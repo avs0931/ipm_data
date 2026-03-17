@@ -1,6 +1,6 @@
 from typing import Any
 import datetime
-from Datagen.Integration_issues import integration_issue
+from Datagen.Integration_issues import IntegrationIssue
 import uuid
 import pandas as pd
 import random
@@ -16,7 +16,7 @@ _faker = Faker("ru-RU")
 class FakeBase:
     # FakeBase - define some basics for all data generators
     def __init__(self):
-        self._ii = integration_issue()
+        self._ii = IntegrationIssue()
         self.fd = dict()
         self.fd["local_id"]: Any = uuid.uuid4()
         self.ii_include: bool = False
@@ -255,7 +255,7 @@ class ContractorPersonnel(FakeBase):
     """
     def __init__(self, contractor_id: uuid, personal_data: pd.DataFrame):
         """
-        Create fresh new single instance of company
+        Create fresh new single instance of company employee
         :param contractor_id: id of company that new employee belongs to.
         :param personal_data: pandas.DataFrame contains personality's data set. One of these will be randomly selected
         as and employee
@@ -268,9 +268,9 @@ class ContractorPersonnel(FakeBase):
         self.fd["personnel_id"] = emp_id
         self.fd["contacts"] = _faker.phone_number() if random.random() < 0.5 else _faker.email()
         self.fd["hire_date"] = _faker.date_between(start_date=datetime.date(2005, 1, 1),
-                                                   end_date=datetime.date(2025, 3, 31))
-        self.fd["fire_date"] = _faker.date_between(start_date=datetime.date(2005, 1, 1),
-                                                   end_date=datetime.date(2025, 3, 31)) \
+                                                   end_date=datetime.date.today() - 45)
+        self.fd["fire_date"] = _faker.date_between(start_date=self.fd["hire_date"] + 30,
+                                                   end_date=datetime.date.today()) \
             if random.random() < 0.01 else ""
         self.fd["valid_to"] = ""
         self.fd["positions"] = "Прораб"
