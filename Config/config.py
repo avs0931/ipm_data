@@ -12,7 +12,7 @@ APP_Debug_Mode: bool = True       # DEBUG messages are allowed
 DB_Server = "localhost"           # PostgreSQL server location
 DB_port = "5432"                  # PostgreSQL server connection port
 DB_User = "postgres"              # Default DB Server
-DB_Password = "QA_2ws3zxc"        # User password
+DB_Password = "**********"        # User password
 DB_Default = "test"               # Default database (schema - public)
 
 # ########################################
